@@ -1,0 +1,1 @@
+export { LocalStorageRepository } from "./LocalStorageRepository";
