@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fredoka, Nunito } from "next/font/google";
 import { SeedProvider } from "@/components/SeedProvider";
 import { Header } from "@/components/Header";
@@ -17,10 +17,24 @@ const nunito = Nunito({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#06b6d4",
+};
+
 export const metadata: Metadata = {
   title: "PequePlan — Actividades infantiles en Barranquilla",
   description:
-    "Encuentra actividades educativas, deportivas y culturales para niños en Barranquilla.",
+    "Encuentra actividades educativas, deportivas y culturales para niños en Barranquilla. Busca por categoría, edad, zona y horario.",
+  keywords: ["actividades infantiles", "niños", "Barranquilla", "deportes", "arte", "música", "educación"],
+  openGraph: {
+    title: "PequePlan — Actividades infantiles en Barranquilla",
+    description: "Encuentra actividades educativas, deportivas y culturales para niños en Barranquilla.",
+    type: "website",
+    locale: "es_CO",
+    siteName: "PequePlan",
+  },
 };
 
 export default function RootLayout({
@@ -33,7 +47,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <SeedProvider>
           <Header />
-          <main className="flex-1">{children}</main>
+          <main id="main-content" className="flex-1">{children}</main>
           <Footer />
         </SeedProvider>
       </body>
