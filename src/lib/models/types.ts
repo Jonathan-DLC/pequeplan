@@ -55,6 +55,7 @@ export interface Actividad {
 }
 
 export interface Favorita {
+  id: string;
   actividadId: string;
   agregadoEn: string;
 }

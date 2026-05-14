@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { BuscadorService } from "@/lib/services";
+import { BuscadorService, CompartirService, FavoritosService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
 
@@ -14,6 +14,8 @@ export default function DetalleActividad() {
   const [categoria, setCategoria] = useState<Categoria | null>(null);
   const [rango, setRango] = useState<RangoEdad | null>(null);
   const [zona, setZona] = useState<Zona | null>(null);
+  const [esFav, setEsFav] = useState(false);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     const svc = new BuscadorService();
@@ -23,7 +25,24 @@ export default function DetalleActividad() {
     setCategoria(new LocalStorageRepository<Categoria>("categorias").obtenerPorId(act.categoriaId));
     setRango(new LocalStorageRepository<RangoEdad>("rangos-edad").obtenerPorId(act.rangoEdadId));
     setZona(new LocalStorageRepository<Zona>("zonas").obtenerPorId(act.zonaId));
+    setEsFav(new FavoritosService().esFavorita(act.id));
   }, [id, router]);
+
+  const toggleFav = useCallback(() => {
+    if (!actividad) return;
+    const svc = new FavoritosService();
+    if (esFav) { svc.quitar(actividad.id); } else { svc.agregar(actividad.id); }
+    setEsFav(!esFav);
+    setToast(esFav ? "Eliminada de favoritas" : "¡Guardada en favoritas!");
+    setTimeout(() => setToast(""), 2000);
+  }, [actividad, esFav]);
+
+  const compartir = useCallback(async () => {
+    if (!actividad) return;
+    const result = await new CompartirService().compartir(actividad);
+    setToast(result === "shared" ? "¡Compartido!" : "Enlace copiado al portapapeles");
+    setTimeout(() => setToast(""), 2000);
+  }, [actividad]);
 
   if (!actividad) return null;
 
@@ -31,7 +50,13 @@ export default function DetalleActividad() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      {/* Volver */}
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-20 right-4 z-50 rounded-xl bg-selva-500 px-4 py-2 text-sm font-medium text-white shadow-lg animate-[fadeIn_0.2s_ease]">
+          {toast}
+        </div>
+      )}
+
       <Link href="/" className="inline-flex items-center gap-1 text-sm text-caribe-600 hover:text-caribe-800 mb-6 transition-colors">
         ← Volver al catálogo
       </Link>
@@ -56,18 +81,31 @@ export default function DetalleActividad() {
             {actividad.esGratuita ? "Gratis" : `$${(actividad.precioDesde ?? 0).toLocaleString("es-CO")}${actividad.precioHasta ? ` - $${actividad.precioHasta.toLocaleString("es-CO")}` : ""}`}
           </span>
         </div>
+
+        {/* Botones de acción */}
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={toggleFav}
+            className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${esFav ? "bg-coral-500 text-white" : "bg-white text-coral-500 border border-coral-200 hover:bg-coral-50"}`}
+          >
+            {esFav ? "❤️ Guardada" : "🤍 Guardar favorita"}
+          </button>
+          <button
+            onClick={compartir}
+            className="rounded-xl bg-white border border-caribe-200 px-4 py-2 text-sm font-semibold text-caribe-600 hover:bg-caribe-50 transition-all"
+          >
+            🔗 Compartir
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-8 md:grid-cols-3">
-        {/* Contenido principal */}
         <div className="md:col-span-2 space-y-6">
-          {/* Descripción */}
           <section className="rounded-2xl bg-white p-6 shadow-sm">
             <h2 className="font-[family-name:var(--font-display)] text-lg font-bold text-slate-700 mb-3">Descripción</h2>
             <p className="text-slate-600 leading-relaxed">{actividad.descripcion}</p>
           </section>
 
-          {/* Horarios */}
           <section className="rounded-2xl bg-white p-6 shadow-sm">
             <h2 className="font-[family-name:var(--font-display)] text-lg font-bold text-slate-700 mb-3">Horarios</h2>
             <div className="space-y-2">
@@ -81,9 +119,7 @@ export default function DetalleActividad() {
           </section>
         </div>
 
-        {/* Sidebar */}
         <aside className="space-y-6">
-          {/* Info rápida */}
           <div className="rounded-2xl bg-white p-6 shadow-sm space-y-4">
             {zona && (
               <div>
@@ -99,33 +135,20 @@ export default function DetalleActividad() {
             )}
             {actividad.moneda && (
               <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase">Precio</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase">Moneda</p>
                 <p className="text-sm text-slate-700">💰 {actividad.moneda}</p>
               </div>
             )}
           </div>
 
-          {/* Contacto */}
           <div className="rounded-2xl bg-white p-6 shadow-sm space-y-3">
             <h3 className="font-[family-name:var(--font-display)] text-base font-bold text-slate-700">Contacto</h3>
-            {actividad.contacto.direccion && (
-              <p className="text-sm text-slate-600">📍 {actividad.contacto.direccion}</p>
-            )}
-            {actividad.contacto.telefono && (
-              <p className="text-sm"><a href={`tel:${actividad.contacto.telefono}`} className="text-caribe-600 hover:underline">📞 {actividad.contacto.telefono}</a></p>
-            )}
-            {actividad.contacto.whatsapp && (
-              <p className="text-sm"><a href={`https://wa.me/57${actividad.contacto.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-selva-600 hover:underline">💬 WhatsApp</a></p>
-            )}
-            {actividad.contacto.email && (
-              <p className="text-sm"><a href={`mailto:${actividad.contacto.email}`} className="text-caribe-600 hover:underline">✉️ {actividad.contacto.email}</a></p>
-            )}
-            {actividad.contacto.sitioWeb && (
-              <p className="text-sm"><a href={actividad.contacto.sitioWeb} target="_blank" rel="noopener noreferrer" className="text-caribe-600 hover:underline">🌐 Sitio web</a></p>
-            )}
-            {actividad.contacto.instagram && (
-              <p className="text-sm"><a href={`https://instagram.com/${actividad.contacto.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="text-coral-500 hover:underline">📸 {actividad.contacto.instagram}</a></p>
-            )}
+            {actividad.contacto.direccion && <p className="text-sm text-slate-600">📍 {actividad.contacto.direccion}</p>}
+            {actividad.contacto.telefono && <p className="text-sm"><a href={`tel:${actividad.contacto.telefono}`} className="text-caribe-600 hover:underline">📞 {actividad.contacto.telefono}</a></p>}
+            {actividad.contacto.whatsapp && <p className="text-sm"><a href={`https://wa.me/57${actividad.contacto.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-selva-600 hover:underline">💬 WhatsApp</a></p>}
+            {actividad.contacto.email && <p className="text-sm"><a href={`mailto:${actividad.contacto.email}`} className="text-caribe-600 hover:underline">✉️ {actividad.contacto.email}</a></p>}
+            {actividad.contacto.sitioWeb && <p className="text-sm"><a href={actividad.contacto.sitioWeb} target="_blank" rel="noopener noreferrer" className="text-caribe-600 hover:underline">🌐 Sitio web</a></p>}
+            {actividad.contacto.instagram && <p className="text-sm"><a href={`https://instagram.com/${actividad.contacto.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="text-coral-500 hover:underline">📸 {actividad.contacto.instagram}</a></p>}
           </div>
         </aside>
       </div>
