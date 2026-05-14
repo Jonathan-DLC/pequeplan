@@ -1,26 +1,49 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-tropical-50: #fffbeb;
+  --color-tropical-100: #fef3c7;
+  --color-tropical-200: #fde68a;
+  --color-tropical-300: #fcd34d;
+  --color-tropical-400: #fbbf24;
+  --color-tropical-500: #f59e0b;
+  --color-tropical-600: #d97706;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-caribe-50: #ecfeff;
+  --color-caribe-100: #cffafe;
+  --color-caribe-200: #a5f3fc;
+  --color-caribe-300: #67e8f9;
+  --color-caribe-400: #22d3ee;
+  --color-caribe-500: #06b6d4;
+  --color-caribe-600: #0891b2;
+  --color-caribe-700: #0e7490;
+
+  --color-coral-50: #fff7ed;
+  --color-coral-100: #ffedd5;
+  --color-coral-200: #fed7aa;
+  --color-coral-300: #fdba74;
+  --color-coral-400: #fb923c;
+  --color-coral-500: #f97316;
+  --color-coral-600: #ea580c;
+
+  --color-selva-50: #ecfdf5;
+  --color-selva-100: #d1fae5;
+  --color-selva-200: #a7f3d0;
+  --color-selva-300: #6ee7b7;
+  --color-selva-400: #34d399;
+  --color-selva-500: #10b981;
+  --color-selva-600: #059669;
+
+  --color-arena-50: #fefce8;
+  --color-arena-100: #fef9c3;
+  --color-arena-200: #fef08a;
+
+  --font-display: "Fredoka", sans-serif;
+  --font-body: "Nunito", sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background: var(--color-arena-50);
+  color: #1e293b;
 }
