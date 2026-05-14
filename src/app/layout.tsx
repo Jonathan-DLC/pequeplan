@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
+import { SeedProvider } from "@/components/SeedProvider";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -27,7 +28,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={`${fredoka.variable} ${nunito.variable}`}>
-      <body>{children}</body>
+      <body>
+        <SeedProvider>{children}</SeedProvider>
+      </body>
     </html>
   );
 }
