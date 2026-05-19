@@ -26,8 +26,6 @@ export default function NuevaActividad() {
   const [direccion, setDireccion] = useState("");
   const [sitioWeb, setSitioWeb] = useState("");
   const [instagram, setInstagram] = useState("");
-  const [latitud, setLatitud] = useState("");
-  const [longitud, setLongitud] = useState("");
 
   useEffect(() => {
     setCategorias(new LocalStorageRepository<Categoria>("categorias").obtenerTodos());
@@ -53,8 +51,8 @@ export default function NuevaActividad() {
       moneda: esGratuita ? null : Moneda.COP,
       estado: EstadoActividad.PUBLICADA,
       imagenUrl: null,
-      latitud: latitud ? Number(latitud) : null,
-      longitud: longitud ? Number(longitud) : null,
+      latitud: null,
+      longitud: null,
       horarios,
       contacto: {
         telefono: telefono || null, whatsapp: whatsapp || null, email: email || null,
@@ -142,15 +140,6 @@ export default function NuevaActividad() {
             <input placeholder="Dirección" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={input} />
             <input placeholder="Sitio web" value={sitioWeb} onChange={(e) => setSitioWeb(e.target.value)} className={input} />
             <input placeholder="Instagram (@usuario)" value={instagram} onChange={(e) => setInstagram(e.target.value)} className={input} />
-          </div>
-        </div>
-
-        {/* Ubicación */}
-        <div>
-          <label className={label}>Ubicación (Google Maps)</label>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <input placeholder="Latitud (ej: 10.9995)" value={latitud} onChange={(e) => setLatitud(e.target.value)} className={input} type="number" step="any" />
-            <input placeholder="Longitud (ej: -74.8109)" value={longitud} onChange={(e) => setLongitud(e.target.value)} className={input} type="number" step="any" />
           </div>
         </div>
 
