@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, query, where, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Proveedor } from "@/lib/models";
 
@@ -8,10 +8,11 @@ function getRef() {
 }
 
 export class ProveedorService {
-  async registrar(data: Omit<Proveedor, "id" | "creadoEn">): Promise<Proveedor> {
+  async registrar(data: Omit<Proveedor, "id" | "creadoEn" | "aprobado">): Promise<Proveedor> {
     const proveedor: Proveedor = {
       ...data,
       id: crypto.randomUUID(),
+      aprobado: false,
       creadoEn: new Date().toISOString(),
     };
     await setDoc(doc(getRef(), proveedor.id), proveedor);
@@ -28,5 +29,18 @@ export class ProveedorService {
   async obtenerPorId(id: string): Promise<Proveedor | null> {
     const snap = await getDoc(doc(getRef(), id));
     return snap.exists() ? (snap.data() as Proveedor) : null;
+  }
+
+  async listarTodos(): Promise<Proveedor[]> {
+    const snap = await getDocs(getRef());
+    return snap.docs.map((d) => d.data() as Proveedor);
+  }
+
+  async aprobar(id: string): Promise<void> {
+    await updateDoc(doc(getRef(), id), { aprobado: true });
+  }
+
+  async rechazar(id: string): Promise<void> {
+    await updateDoc(doc(getRef(), id), { aprobado: false });
   }
 }

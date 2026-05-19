@@ -59,14 +59,21 @@ export default function PanelProveedor() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
+      {!proveedor?.aprobado && (
+        <div className="rounded-2xl bg-yellow-50 border border-yellow-200 p-4 mb-6 text-sm text-yellow-800">
+          ⏳ Tu registro está pendiente de aprobación por un administrador. Una vez aprobado podrás publicar actividades.
+        </div>
+      )}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-caribe-700">🏪 {proveedor?.nombreNegocio}</h1>
           <p className="text-sm text-slate-500 mt-1">Panel de proveedor</p>
         </div>
-        <Link href="/proveedor/nueva" className="rounded-xl bg-caribe-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-caribe-600 transition-colors">
-          + Nueva actividad
-        </Link>
+        {proveedor?.aprobado && (
+          <Link href="/proveedor/nueva" className="rounded-xl bg-caribe-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-caribe-600 transition-colors">
+            + Nueva actividad
+          </Link>
+        )}
       </div>
 
       {actividades.length === 0 ? (

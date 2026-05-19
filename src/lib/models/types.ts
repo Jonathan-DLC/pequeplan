@@ -65,6 +65,7 @@ export interface Proveedor {
   descripcion: string;
   telefono: string;
   email: string;
+  aprobado: boolean;
   creadoEn: string;
 }
 

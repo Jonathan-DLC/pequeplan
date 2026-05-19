@@ -34,6 +34,7 @@ export default function NuevaActividadProveedor() {
     if (loading || !user) return;
     new ProveedorService().obtenerPorUid(user.uid).then((p) => {
       if (!p) { router.push("/proveedor/registro"); return; }
+      if (!p.aprobado) { router.push("/proveedor"); return; }
       setProveedor(p);
     });
     setCategorias(new LocalStorageRepository<Categoria>("categorias").obtenerTodos());

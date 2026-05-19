@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/AuthContext";
 
 const links = [
   { href: "/admin", label: "📋 Actividades" },
+  { href: "/admin/proveedores", label: "🏪 Proveedores" },
   { href: "/admin/categorias", label: "🏷️ Categorías" },
   { href: "/admin/rangos-edad", label: "👶 Rangos de edad" },
   { href: "/admin/datos", label: "💾 Import/Export" },

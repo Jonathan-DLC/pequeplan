@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Actividad, Categoria, Zona } from "@/lib/models";
 import { FavoritosService } from "@/lib/services";
+import { useAuth } from "@/lib/auth/AuthContext";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -12,15 +13,16 @@ interface Props {
 }
 
 export function ActivityCard({ actividad, categoria, zona }: Props) {
+  const { user } = useAuth();
   const [esFav, setEsFav] = useState(false);
 
   useEffect(() => {
-    setEsFav(new FavoritosService().esFavoritaLocal(actividad.id));
-  }, [actividad.id]);
+    setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(actividad.id));
+  }, [actividad.id, user]);
 
   const toggleFav = (e: React.MouseEvent) => {
     e.preventDefault();
-    const svc = new FavoritosService();
+    const svc = new FavoritosService(user?.uid);
     if (esFav) { svc.quitar(actividad.id); } else { svc.agregar(actividad.id); }
     setEsFav(!esFav);
   };
