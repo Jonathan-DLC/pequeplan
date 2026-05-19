@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { BuscadorService, CompartirService, FavoritosService } from "@/lib/services";
+import { BuscadorService, CompartirService, FavoritosService, ReservaService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
 
@@ -21,6 +21,10 @@ export default function DetalleActividad() {
   const [zona, setZona] = useState<Zona | null>(null);
   const [esFav, setEsFav] = useState(false);
   const [toast, setToast] = useState("");
+  const [showInscribir, setShowInscribir] = useState(false);
+  const [nombreNino, setNombreNino] = useState("");
+  const [inscribiendo, setInscribiendo] = useState(false);
+  const [cuposRestantes, setCuposRestantes] = useState<number | null>(null);
 
   useEffect(() => {
     const svc = new BuscadorService();
@@ -31,6 +35,11 @@ export default function DetalleActividad() {
     setRango(new LocalStorageRepository<RangoEdad>("rangos-edad").obtenerPorId(act.rangoEdadId));
     setZona(new LocalStorageRepository<Zona>("zonas").obtenerPorId(act.zonaId));
     setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(act.id));
+    if (act.cuposDisponibles != null) {
+      new ReservaService().contarActivasPorActividad(act.id).then((count) => {
+        setCuposRestantes(act.cuposDisponibles! - count);
+      });
+    }
   }, [id, router, user]);
 
   const toggleFav = useCallback(async () => {
@@ -50,6 +59,18 @@ export default function DetalleActividad() {
   }, [actividad]);
 
   if (!actividad) return null;
+
+  const inscribir = async () => {
+    if (!user || !actividad || !nombreNino.trim()) return;
+    setInscribiendo(true);
+    await new ReservaService().inscribir(actividad.id, user.uid, nombreNino.trim());
+    setShowInscribir(false);
+    setNombreNino("");
+    setInscribiendo(false);
+    if (cuposRestantes != null) setCuposRestantes(cuposRestantes - 1);
+    setToast("¡Inscripción exitosa!");
+    setTimeout(() => setToast(""), 2000);
+  };
 
   const dias: Record<string, string> = { LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes", SABADO: "Sábado", DOMINGO: "Domingo" };
 
@@ -115,6 +136,17 @@ export default function DetalleActividad() {
               📍 Ver en Google Maps
             </a>
           )}
+          {user && cuposRestantes !== 0 && (
+            <button
+              onClick={() => setShowInscribir(true)}
+              className="rounded-xl bg-selva-500 px-4 py-2 text-sm font-semibold text-white hover:bg-selva-600 transition-all"
+            >
+              ✅ Inscribir niño {cuposRestantes != null && `(${cuposRestantes} cupos)`}
+            </button>
+          )}
+          {cuposRestantes === 0 && (
+            <span className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-500">Sin cupos</span>
+          )}
         </div>
       </div>
 
@@ -178,6 +210,29 @@ export default function DetalleActividad() {
           </div>
         </aside>
       </div>
+
+      {/* Modal inscripción */}
+      {showInscribir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="rounded-2xl bg-white p-6 shadow-xl w-full max-w-sm mx-4">
+            <h3 className="font-bold text-lg text-slate-700 mb-4">Inscribir niño</h3>
+            <input
+              placeholder="Nombre del niño"
+              value={nombreNino}
+              onChange={(e) => setNombreNino(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-caribe-400 mb-4"
+            />
+            <div className="flex gap-3">
+              <button onClick={inscribir} disabled={inscribiendo || !nombreNino.trim()} className="flex-1 rounded-xl bg-selva-500 px-4 py-2 text-sm font-semibold text-white hover:bg-selva-600 disabled:opacity-50">
+                {inscribiendo ? "Inscribiendo..." : "Confirmar"}
+              </button>
+              <button onClick={() => setShowInscribir(false)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

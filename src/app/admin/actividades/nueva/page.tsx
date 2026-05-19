@@ -54,6 +54,7 @@ export default function NuevaActividad() {
       latitud: null,
       longitud: null,
       proveedorId: null,
+      cuposDisponibles: null,
       horarios,
       contacto: {
         telefono: telefono || null, whatsapp: whatsapp || null, email: email || null,

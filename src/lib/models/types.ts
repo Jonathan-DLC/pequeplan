@@ -51,6 +51,7 @@ export interface Actividad {
   latitud: number | null;
   longitud: number | null;
   proveedorId: string | null;
+  cuposDisponibles: number | null;
   horarios: Horario[];
   contacto: Contacto;
   creadoEn: string;
@@ -64,6 +65,15 @@ export interface Proveedor {
   descripcion: string;
   telefono: string;
   email: string;
+  creadoEn: string;
+}
+
+export interface Reserva {
+  id: string;
+  actividadId: string;
+  uid: string;
+  nombreNino: string;
+  estado: "ACTIVA" | "CANCELADA";
   creadoEn: string;
 }
 

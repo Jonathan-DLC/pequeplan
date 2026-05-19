@@ -30,6 +30,11 @@ export function Header() {
               </Link>
             )}
             {user && (
+              <Link href="/mis-inscripciones" className="text-slate-600 hover:text-caribe-600 transition-colors">
+                📋 Inscripciones
+              </Link>
+            )}
+            {user && (
               <Link href="/proveedor" className="text-slate-600 hover:text-caribe-600 transition-colors">
                 🏪 Proveedor
               </Link>

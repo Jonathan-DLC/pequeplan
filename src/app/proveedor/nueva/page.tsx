@@ -27,6 +27,7 @@ export default function NuevaActividadProveedor() {
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [direccion, setDireccion] = useState("");
+  const [cupos, setCupos] = useState("");
   const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function NuevaActividadProveedor() {
       imagenUrl: null,
       latitud: null,
       longitud: null,
+      cuposDisponibles: cupos ? Number(cupos) : null,
       horarios,
       contacto: {
         telefono: telefono || null, whatsapp: whatsapp || null, email: email || null,
@@ -124,6 +126,7 @@ export default function NuevaActividadProveedor() {
               <input placeholder="Precio hasta" value={precioHasta} onChange={(e) => setPrecioHasta(e.target.value)} className={`${input} w-32`} type="number" />
             </>
           )}
+          <input placeholder="Cupos (ej: 20)" value={cupos} onChange={(e) => setCupos(e.target.value)} className={`${input} w-32`} type="number" />
         </div>
 
         <div>

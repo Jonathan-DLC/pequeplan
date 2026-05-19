@@ -6,4 +6,5 @@ export { CatalogoAdminService } from "./CatalogoAdminService";
 export { ImportExportService } from "./ImportExportService";
 export { ProveedorService } from "./ProveedorService";
 export { ProveedorActividadService } from "./ProveedorActividadService";
+export { ReservaService } from "./ReservaService";
 export type { FiltrosBusqueda } from "./BuscadorService";
