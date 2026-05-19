@@ -27,6 +27,8 @@ export default function EditarActividad() {
   const [direccion, setDireccion] = useState("");
   const [sitioWeb, setSitioWeb] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [latitud, setLatitud] = useState("");
+  const [longitud, setLongitud] = useState("");
 
   useEffect(() => {
     setCategorias(new LocalStorageRepository<Categoria>("categorias").obtenerTodos());
@@ -50,6 +52,8 @@ export default function EditarActividad() {
     setDireccion(act.contacto.direccion ?? "");
     setSitioWeb(act.contacto.sitioWeb ?? "");
     setInstagram(act.contacto.instagram ?? "");
+    setLatitud(act.latitud?.toString() ?? "");
+    setLongitud(act.longitud?.toString() ?? "");
   }, [id, router]);
 
   const addHorario = () => setHorarios([...horarios, { diaSemana: DiaSemana.LUNES, horaInicio: "14:00", horaFin: "15:00" }]);
@@ -68,6 +72,8 @@ export default function EditarActividad() {
       precioDesde: esGratuita ? null : Number(precioDesde) || null,
       precioHasta: esGratuita ? null : Number(precioHasta) || null,
       moneda: esGratuita ? null : Moneda.COP,
+      latitud: latitud ? Number(latitud) : null,
+      longitud: longitud ? Number(longitud) : null,
       horarios,
       contacto: {
         telefono: telefono || null, whatsapp: whatsapp || null, email: email || null,
@@ -153,6 +159,15 @@ export default function EditarActividad() {
             <input placeholder="Dirección" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={input} />
             <input placeholder="Sitio web" value={sitioWeb} onChange={(e) => setSitioWeb(e.target.value)} className={input} />
             <input placeholder="Instagram (@usuario)" value={instagram} onChange={(e) => setInstagram(e.target.value)} className={input} />
+          </div>
+        </div>
+
+        {/* Ubicación */}
+        <div>
+          <label className={label}>Ubicación (Google Maps)</label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <input placeholder="Latitud (ej: 10.9995)" value={latitud} onChange={(e) => setLatitud(e.target.value)} className={input} type="number" step="any" />
+            <input placeholder="Longitud (ej: -74.8109)" value={longitud} onChange={(e) => setLongitud(e.target.value)} className={input} type="number" step="any" />
           </div>
         </div>
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth/AuthContext";
 import { BuscadorService, CompartirService, FavoritosService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
@@ -10,6 +11,7 @@ import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
 export default function DetalleActividad() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useAuth();
   const [actividad, setActividad] = useState<Actividad | null>(null);
   const [categoria, setCategoria] = useState<Categoria | null>(null);
   const [rango, setRango] = useState<RangoEdad | null>(null);
@@ -25,17 +27,17 @@ export default function DetalleActividad() {
     setCategoria(new LocalStorageRepository<Categoria>("categorias").obtenerPorId(act.categoriaId));
     setRango(new LocalStorageRepository<RangoEdad>("rangos-edad").obtenerPorId(act.rangoEdadId));
     setZona(new LocalStorageRepository<Zona>("zonas").obtenerPorId(act.zonaId));
-    setEsFav(new FavoritosService().esFavorita(act.id));
-  }, [id, router]);
+    setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(act.id));
+  }, [id, router, user]);
 
-  const toggleFav = useCallback(() => {
+  const toggleFav = useCallback(async () => {
     if (!actividad) return;
-    const svc = new FavoritosService();
-    if (esFav) { svc.quitar(actividad.id); } else { svc.agregar(actividad.id); }
+    const svc = new FavoritosService(user?.uid);
+    if (esFav) { await svc.quitar(actividad.id); } else { await svc.agregar(actividad.id); }
     setEsFav(!esFav);
     setToast(esFav ? "Eliminada de favoritas" : "¡Guardada en favoritas!");
     setTimeout(() => setToast(""), 2000);
-  }, [actividad, esFav]);
+  }, [actividad, esFav, user]);
 
   const compartir = useCallback(async () => {
     if (!actividad) return;
@@ -48,9 +50,14 @@ export default function DetalleActividad() {
 
   const dias: Record<string, string> = { LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes", SABADO: "Sábado", DOMINGO: "Domingo" };
 
+  const mapsUrl = actividad.latitud && actividad.longitud
+    ? `https://www.google.com/maps?q=${actividad.latitud},${actividad.longitud}`
+    : actividad.contacto.direccion
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(actividad.contacto.direccion)}`
+      : null;
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      {/* Toast */}
       {toast && (
         <div className="fixed top-20 right-4 z-50 rounded-xl bg-selva-500 px-4 py-2 text-sm font-medium text-white shadow-lg animate-[fadeIn_0.2s_ease]">
           {toast}
@@ -82,8 +89,7 @@ export default function DetalleActividad() {
           </span>
         </div>
 
-        {/* Botones de acción */}
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-wrap gap-3">
           <button
             onClick={toggleFav}
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${esFav ? "bg-coral-500 text-white" : "bg-white text-coral-500 border border-coral-200 hover:bg-coral-50"}`}
@@ -96,6 +102,16 @@ export default function DetalleActividad() {
           >
             🔗 Compartir
           </button>
+          {mapsUrl && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl bg-white border border-selva-200 px-4 py-2 text-sm font-semibold text-selva-600 hover:bg-selva-50 transition-all"
+            >
+              📍 Ver en Google Maps
+            </a>
+          )}
         </div>
       </div>
 

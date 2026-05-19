@@ -15,7 +15,7 @@ export function ActivityCard({ actividad, categoria, zona }: Props) {
   const [esFav, setEsFav] = useState(false);
 
   useEffect(() => {
-    setEsFav(new FavoritosService().esFavorita(actividad.id));
+    setEsFav(new FavoritosService().esFavoritaLocal(actividad.id));
   }, [actividad.id]);
 
   const toggleFav = (e: React.MouseEvent) => {

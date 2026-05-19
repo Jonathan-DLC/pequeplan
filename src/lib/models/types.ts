@@ -48,6 +48,8 @@ export interface Actividad {
   moneda: Moneda | null;
   estado: EstadoActividad;
   imagenUrl: string | null;
+  latitud: number | null;
+  longitud: number | null;
   horarios: Horario[];
   contacto: Contacto;
   creadoEn: string;

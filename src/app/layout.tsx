@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka, Nunito } from "next/font/google";
-import { SeedProvider } from "@/components/SeedProvider";
+import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
@@ -45,11 +45,11 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${fredoka.variable} ${nunito.variable}`}>
       <body className="min-h-screen flex flex-col">
-        <SeedProvider>
+        <Providers>
           <Header />
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />
-        </SeedProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/lib/auth/AuthContext";
 import { FavoritosService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, Zona } from "@/lib/models";
@@ -8,15 +9,19 @@ import { ActivityCard } from "@/components/ActivityCard";
 import Link from "next/link";
 
 export default function Favoritas() {
+  const { user } = useAuth();
   const [actividades, setActividades] = useState<Actividad[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
 
   useEffect(() => {
-    setActividades(new FavoritosService().listar());
+    const svc = new FavoritosService(user?.uid);
+    svc.sincronizarDesdeFirestore().then(() => {
+      setActividades(svc.listarLocal());
+    });
     setCategorias(new LocalStorageRepository<Categoria>("categorias").obtenerTodos());
     setZonas(new LocalStorageRepository<Zona>("zonas").obtenerTodos());
-  }, []);
+  }, [user]);
 
   const catMap = useMemo(() => new Map(categorias.map((c) => [c.id, c])), [categorias]);
   const zonaMap = useMemo(() => new Map(zonas.map((z) => [z.id, z])), [zonas]);
