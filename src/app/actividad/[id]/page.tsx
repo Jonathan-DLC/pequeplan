@@ -3,10 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { BuscadorService, CompartirService, FavoritosService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
+
+const MapaEmbed = dynamic(() => import("@/components/MapaEmbed").then((m) => m.MapaEmbed), { ssr: false });
 
 export default function DetalleActividad() {
   const { id } = useParams<{ id: string }>();
@@ -133,6 +136,13 @@ export default function DetalleActividad() {
               ))}
             </div>
           </section>
+
+          {actividad.latitud && actividad.longitud && (
+            <section className="rounded-2xl bg-white p-6 shadow-sm">
+              <h2 className="font-[family-name:var(--font-display)] text-lg font-bold text-slate-700 mb-3">Ubicación</h2>
+              <MapaEmbed latitud={actividad.latitud} longitud={actividad.longitud} nombre={actividad.nombre} />
+            </section>
+          )}
         </div>
 
         <aside className="space-y-6">

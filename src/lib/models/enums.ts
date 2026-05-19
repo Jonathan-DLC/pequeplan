@@ -1,6 +1,7 @@
 export enum EstadoActividad {
   PUBLICADA = "PUBLICADA",
   DESPUBLICADA = "DESPUBLICADA",
+  PAUSADA = "PAUSADA",
 }
 
 export enum DiaSemana {

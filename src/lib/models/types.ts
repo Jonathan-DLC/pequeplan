@@ -50,10 +50,21 @@ export interface Actividad {
   imagenUrl: string | null;
   latitud: number | null;
   longitud: number | null;
+  proveedorId: string | null;
   horarios: Horario[];
   contacto: Contacto;
   creadoEn: string;
   actualizadoEn: string;
+}
+
+export interface Proveedor {
+  id: string;
+  uid: string;
+  nombreNegocio: string;
+  descripcion: string;
+  telefono: string;
+  email: string;
+  creadoEn: string;
 }
 
 export interface Favorita {

@@ -29,6 +29,11 @@ export function Header() {
                 ❤️ Favoritas
               </Link>
             )}
+            {user && (
+              <Link href="/proveedor" className="text-slate-600 hover:text-caribe-600 transition-colors">
+                🏪 Proveedor
+              </Link>
+            )}
             {esAdmin && (
               <Link href="/admin" className="text-slate-600 hover:text-caribe-600 transition-colors">
                 ⚙️ Admin

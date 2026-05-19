@@ -16,6 +16,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9995,
     longitud: -74.8109,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.MARTES, horaInicio: "15:00", horaFin: "16:00" },
       { diaSemana: DiaSemana.JUEVES, horaInicio: "15:00", horaFin: "16:00" },
@@ -40,6 +41,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9837,
     longitud: -74.7889,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.LUNES, horaInicio: "14:00", horaFin: "16:00" },
       { diaSemana: DiaSemana.MIERCOLES, horaInicio: "14:00", horaFin: "16:00" },
@@ -63,6 +65,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9762,
     longitud: -74.7950,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.LUNES, horaInicio: "16:00", horaFin: "17:30" },
       { diaSemana: DiaSemana.MIERCOLES, horaInicio: "16:00", horaFin: "17:30" },
@@ -87,6 +90,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 11.0042,
     longitud: -74.8145,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.SABADO, horaInicio: "09:00", horaFin: "11:00" },
     ],
@@ -109,6 +113,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9918,
     longitud: -74.7862,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.MARTES, horaInicio: "16:00", horaFin: "17:00" },
       { diaSemana: DiaSemana.JUEVES, horaInicio: "16:00", horaFin: "17:00" },
@@ -132,6 +137,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9945,
     longitud: -74.8056,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.LUNES, horaInicio: "15:00", horaFin: "16:30" },
       { diaSemana: DiaSemana.MIERCOLES, horaInicio: "15:00", horaFin: "16:30" },
@@ -156,6 +162,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 11.0068,
     longitud: -74.8118,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.LUNES, horaInicio: "14:00", horaFin: "15:30" },
       { diaSemana: DiaSemana.MIERCOLES, horaInicio: "14:00", horaFin: "15:30" },
@@ -180,6 +187,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9685,
     longitud: -74.7813,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.SABADO, horaInicio: "10:00", horaFin: "12:00" },
     ],
@@ -202,6 +210,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9803,
     longitud: -74.7911,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.MARTES, horaInicio: "17:00", horaFin: "18:30" },
       { diaSemana: DiaSemana.JUEVES, horaInicio: "17:00", horaFin: "18:30" },
@@ -226,6 +235,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9710,
     longitud: -74.7830,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.SABADO, horaInicio: "14:00", horaFin: "16:00" },
     ],
@@ -248,6 +258,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9730,
     longitud: -74.7980,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.MARTES, horaInicio: "17:00", horaFin: "18:30" },
       { diaSemana: DiaSemana.JUEVES, horaInicio: "17:00", horaFin: "18:30" },
@@ -271,6 +282,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9856,
     longitud: -74.7953,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.MIERCOLES, horaInicio: "15:00", horaFin: "17:00" },
       { diaSemana: DiaSemana.SABADO, horaInicio: "10:00", horaFin: "12:00" },
@@ -294,6 +306,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9185,
     longitud: -74.7680,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.LUNES, horaInicio: "17:00", horaFin: "18:30" },
       { diaSemana: DiaSemana.MIERCOLES, horaInicio: "17:00", horaFin: "18:30" },
@@ -318,6 +331,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9960,
     longitud: -74.8070,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.SABADO, horaInicio: "10:00", horaFin: "12:00" },
       { diaSemana: DiaSemana.DOMINGO, horaInicio: "10:00", horaFin: "12:00" },
@@ -341,6 +355,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 11.0010,
     longitud: -74.8098,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.MARTES, horaInicio: "15:00", horaFin: "16:30" },
       { diaSemana: DiaSemana.JUEVES, horaInicio: "15:00", horaFin: "16:30" },
@@ -364,6 +379,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9550,
     longitud: -74.7720,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.VIERNES, horaInicio: "16:00", horaFin: "18:00" },
       { diaSemana: DiaSemana.SABADO, horaInicio: "09:00", horaFin: "11:00" },
@@ -387,6 +403,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9700,
     longitud: -74.7840,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.LUNES, horaInicio: "16:00", horaFin: "17:30" },
       { diaSemana: DiaSemana.MIERCOLES, horaInicio: "16:00", horaFin: "17:30" },
@@ -410,6 +427,7 @@ export const actividades: Actividad[] = [
     imagenUrl: null,
     latitud: 10.9780,
     longitud: -74.7880,
+    proveedorId: null,
     horarios: [
       { diaSemana: DiaSemana.LUNES, horaInicio: "15:00", horaFin: "17:00" },
       { diaSemana: DiaSemana.VIERNES, horaInicio: "15:00", horaFin: "17:00" },

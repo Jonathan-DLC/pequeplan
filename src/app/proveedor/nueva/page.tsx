@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CatalogoAdminService } from "@/lib/services";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { ProveedorService, ProveedorActividadService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
-import { Categoria, DiaSemana, EstadoActividad, Horario, Moneda, RangoEdad, Zona } from "@/lib/models";
+import { Categoria, DiaSemana, EstadoActividad, Horario, Moneda, Proveedor, RangoEdad, Zona } from "@/lib/models";
 
-export default function NuevaActividad() {
+export default function NuevaActividadProveedor() {
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const [proveedor, setProveedor] = useState<Proveedor | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [rangos, setRangos] = useState<RangoEdad[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
@@ -24,14 +27,18 @@ export default function NuevaActividad() {
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [sitioWeb, setSitioWeb] = useState("");
-  const [instagram, setInstagram] = useState("");
+  const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
+    if (loading || !user) return;
+    new ProveedorService().obtenerPorUid(user.uid).then((p) => {
+      if (!p) { router.push("/proveedor/registro"); return; }
+      setProveedor(p);
+    });
     setCategorias(new LocalStorageRepository<Categoria>("categorias").obtenerTodos());
     setRangos(new LocalStorageRepository<RangoEdad>("rangos-edad").obtenerTodos());
     setZonas(new LocalStorageRepository<Zona>("zonas").obtenerTodos());
-  }, []);
+  }, [user, loading, router]);
 
   const addHorario = () => setHorarios([...horarios, { diaSemana: DiaSemana.LUNES, horaInicio: "14:00", horaFin: "15:00" }]);
   const removeHorario = (i: number) => setHorarios(horarios.filter((_, idx) => idx !== i));
@@ -41,9 +48,10 @@ export default function NuevaActividad() {
     setHorarios(copy);
   };
 
-  const guardar = () => {
-    if (!nombre || !categoriaId || !rangoEdadId || !zonaId) { alert("Completa los campos obligatorios"); return; }
-    new CatalogoAdminService().crear({
+  const guardar = async () => {
+    if (!proveedor || !nombre || !categoriaId || !rangoEdadId || !zonaId) { alert("Completa los campos obligatorios"); return; }
+    setGuardando(true);
+    await new ProveedorActividadService(proveedor.id).crear({
       nombre, descripcion, categoriaId, rangoEdadId, zonaId,
       esGratuita,
       precioDesde: esGratuita ? null : Number(precioDesde) || null,
@@ -53,22 +61,25 @@ export default function NuevaActividad() {
       imagenUrl: null,
       latitud: null,
       longitud: null,
-      proveedorId: null,
       horarios,
       contacto: {
         telefono: telefono || null, whatsapp: whatsapp || null, email: email || null,
-        direccion: direccion || null, sitioWeb: sitioWeb || null, instagram: instagram || null,
+        direccion: direccion || null, sitioWeb: null, instagram: null,
       },
     });
-    router.push("/admin");
+    router.push("/proveedor");
   };
+
+  if (loading || !proveedor) {
+    return <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-caribe-200 border-t-caribe-500" /></div>;
+  }
 
   const input = "w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-caribe-400";
   const label = "block text-xs font-semibold text-slate-500 uppercase mb-1";
 
   return (
-    <div>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-slate-800 mb-6">Nueva Actividad</h1>
+    <div className="mx-auto max-w-2xl px-4 py-8">
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-caribe-700 mb-6">Publicar actividad</h1>
       <div className="rounded-2xl bg-white p-6 shadow-sm space-y-5">
         <div>
           <label className={label}>Nombre *</label>
@@ -105,7 +116,7 @@ export default function NuevaActividad() {
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={esGratuita} onChange={(e) => setEsGratuita(e.target.checked)} className="rounded" />
-            Actividad gratuita
+            Gratuita
           </label>
           {!esGratuita && (
             <>
@@ -115,7 +126,6 @@ export default function NuevaActividad() {
           )}
         </div>
 
-        {/* Horarios */}
         <div>
           <label className={label}>Horarios</label>
           {horarios.map((h, i) => (
@@ -131,7 +141,6 @@ export default function NuevaActividad() {
           <button onClick={addHorario} className="text-sm text-caribe-600 hover:underline">+ Agregar horario</button>
         </div>
 
-        {/* Contacto */}
         <div>
           <label className={label}>Contacto</label>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -139,16 +148,14 @@ export default function NuevaActividad() {
             <input placeholder="WhatsApp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={input} />
             <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} />
             <input placeholder="Dirección" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={input} />
-            <input placeholder="Sitio web" value={sitioWeb} onChange={(e) => setSitioWeb(e.target.value)} className={input} />
-            <input placeholder="Instagram (@usuario)" value={instagram} onChange={(e) => setInstagram(e.target.value)} className={input} />
           </div>
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button onClick={guardar} className="rounded-xl bg-caribe-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-caribe-600 transition-colors">
-            Guardar actividad
+          <button onClick={guardar} disabled={guardando} className="rounded-xl bg-caribe-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-caribe-600 transition-colors disabled:opacity-50">
+            {guardando ? "Publicando..." : "Publicar actividad"}
           </button>
-          <button onClick={() => router.push("/admin")} className="rounded-xl border border-slate-200 px-6 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+          <button onClick={() => router.push("/proveedor")} className="rounded-xl border border-slate-200 px-6 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
             Cancelar
           </button>
         </div>
