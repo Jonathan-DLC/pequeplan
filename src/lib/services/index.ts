@@ -9,4 +9,5 @@ export { ProveedorActividadService } from "./ProveedorActividadService";
 export { ReservaService } from "./ReservaService";
 export { ResenaService } from "./ResenaService";
 export { ReporteService } from "./ReporteService";
+export { SuscripcionService, PLANES } from "./SuscripcionService";
 export type { FiltrosBusqueda } from "./BuscadorService";

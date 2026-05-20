@@ -64,6 +64,7 @@ export default function NuevaActividadProveedor() {
       latitud: null,
       longitud: null,
       cuposDisponibles: cupos ? Number(cupos) : null,
+      destacada: false,
       horarios,
       contacto: {
         telefono: telefono || null, whatsapp: whatsapp || null, email: email || null,

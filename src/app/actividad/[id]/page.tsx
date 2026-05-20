@@ -65,7 +65,7 @@ export default function DetalleActividad() {
   const inscribir = async () => {
     if (!user || !actividad || !nombreNino.trim()) return;
     setInscribiendo(true);
-    await new ReservaService().inscribir(actividad.id, user.uid, nombreNino.trim());
+    await new ReservaService().inscribir(actividad.id, user.uid, nombreNino.trim(), actividad.proveedorId, actividad.precioDesde);
     setShowInscribir(false);
     setNombreNino("");
     setInscribiendo(false);

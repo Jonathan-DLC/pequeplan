@@ -35,8 +35,15 @@ export function ActivityCard({ actividad, categoria, zona }: Props) {
   return (
     <Link
       href={`/actividad/${actividad.id}`}
-      className="group relative block rounded-3xl bg-white p-5 shadow-md shadow-caribe-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-caribe-200/50"
+      className={`group relative block rounded-3xl bg-white p-5 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+        actividad.destacada ? "ring-2 ring-yellow-300 shadow-yellow-100" : "shadow-caribe-100 hover:shadow-caribe-200/50"
+      }`}
     >
+      {/* Badge destacada */}
+      {actividad.destacada && (
+        <span className="absolute top-3 left-3 rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-bold text-yellow-900">⭐ Destacada</span>
+      )}
+
       {/* Botón favorita */}
       <button
         onClick={toggleFav}

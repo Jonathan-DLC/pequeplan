@@ -52,6 +52,7 @@ export interface Actividad {
   longitud: number | null;
   proveedorId: string | null;
   cuposDisponibles: number | null;
+  destacada: boolean;
   horarios: Horario[];
   contacto: Contacto;
   creadoEn: string;
@@ -76,6 +77,7 @@ export interface Reserva {
   uid: string;
   nombreNino: string;
   estado: "ACTIVA" | "CANCELADA";
+  comision: number;
   creadoEn: string;
 }
 
@@ -98,6 +100,15 @@ export interface Reporte {
   motivo: string;
   estado: "PENDIENTE" | "RESUELTO";
   creadoEn: string;
+}
+
+export interface Suscripcion {
+  id: string;
+  proveedorId: string;
+  plan: "BASICO" | "PREMIUM";
+  fechaInicio: string;
+  fechaFin: string;
+  activa: boolean;
 }
 
 export interface Favorita {

@@ -55,6 +55,7 @@ export default function NuevaActividad() {
       longitud: null,
       proveedorId: null,
       cuposDisponibles: null,
+      destacada: false,
       horarios,
       contacto: {
         telefono: telefono || null, whatsapp: whatsapp || null, email: email || null,
