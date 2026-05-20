@@ -66,6 +66,7 @@ export interface Proveedor {
   telefono: string;
   email: string;
   aprobado: boolean;
+  verificado: boolean;
   creadoEn: string;
 }
 
@@ -75,6 +76,27 @@ export interface Reserva {
   uid: string;
   nombreNino: string;
   estado: "ACTIVA" | "CANCELADA";
+  creadoEn: string;
+}
+
+export interface Resena {
+  id: string;
+  actividadId: string;
+  uid: string;
+  nombreUsuario: string;
+  estrellas: number;
+  comentario: string;
+  respuestaProveedor: string | null;
+  creadoEn: string;
+}
+
+export interface Reporte {
+  id: string;
+  tipo: "resena" | "actividad";
+  referenciaId: string;
+  uid: string;
+  motivo: string;
+  estado: "PENDIENTE" | "RESUELTO";
   creadoEn: string;
 }
 

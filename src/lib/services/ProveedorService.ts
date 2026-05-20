@@ -8,11 +8,12 @@ function getRef() {
 }
 
 export class ProveedorService {
-  async registrar(data: Omit<Proveedor, "id" | "creadoEn" | "aprobado">): Promise<Proveedor> {
+  async registrar(data: Omit<Proveedor, "id" | "creadoEn" | "aprobado" | "verificado">): Promise<Proveedor> {
     const proveedor: Proveedor = {
       ...data,
       id: crypto.randomUUID(),
       aprobado: false,
+      verificado: false,
       creadoEn: new Date().toISOString(),
     };
     await setDoc(doc(getRef(), proveedor.id), proveedor);
@@ -42,5 +43,13 @@ export class ProveedorService {
 
   async rechazar(id: string): Promise<void> {
     await updateDoc(doc(getRef(), id), { aprobado: false });
+  }
+
+  async verificar(id: string): Promise<void> {
+    await updateDoc(doc(getRef(), id), { verificado: true });
+  }
+
+  async quitarVerificacion(id: string): Promise<void> {
+    await updateDoc(doc(getRef(), id), { verificado: false });
   }
 }

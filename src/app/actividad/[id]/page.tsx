@@ -11,6 +11,8 @@ import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
 
 const MapaEmbed = dynamic(() => import("@/components/MapaEmbed").then((m) => m.MapaEmbed), { ssr: false });
 
+import { SeccionResenas } from "@/components/SeccionResenas";
+
 export default function DetalleActividad() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -175,6 +177,8 @@ export default function DetalleActividad() {
               <MapaEmbed latitud={actividad.latitud} longitud={actividad.longitud} nombre={actividad.nombre} />
             </section>
           )}
+
+          <SeccionResenas actividadId={actividad.id} proveedorId={actividad.proveedorId} />
         </div>
 
         <aside className="space-y-6">

@@ -25,6 +25,16 @@ export default function AdminProveedores() {
     setProveedores((prev) => prev.map((p) => p.id === id ? { ...p, aprobado: false } : p));
   };
 
+  const verificar = async (id: string) => {
+    await new ProveedorService().verificar(id);
+    setProveedores((prev) => prev.map((p) => p.id === id ? { ...p, verificado: true } : p));
+  };
+
+  const quitarVerif = async (id: string) => {
+    await new ProveedorService().quitarVerificacion(id);
+    setProveedores((prev) => prev.map((p) => p.id === id ? { ...p, verificado: false } : p));
+  };
+
   if (cargando) {
     return <div className="flex justify-center py-10"><div className="h-8 w-8 animate-spin rounded-full border-4 border-caribe-200 border-t-caribe-500" /></div>;
   }
@@ -50,14 +60,26 @@ export default function AdminProveedores() {
                 }`}>
                   {p.aprobado ? "Aprobado" : "Pendiente"}
                 </span>
+                {p.verificado && <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">✓ Verificado</span>}
                 {!p.aprobado ? (
                   <button onClick={() => aprobar(p.id)} className="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200">
                     ✓ Aprobar
                   </button>
                 ) : (
-                  <button onClick={() => rechazar(p.id)} className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100">
-                    ✗ Revocar
-                  </button>
+                  <>
+                    <button onClick={() => rechazar(p.id)} className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100">
+                      ✗ Revocar
+                    </button>
+                    {!p.verificado ? (
+                      <button onClick={() => verificar(p.id)} className="rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200">
+                        🛡️ Verificar
+                      </button>
+                    ) : (
+                      <button onClick={() => quitarVerif(p.id)} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200">
+                        Quitar ✓
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>

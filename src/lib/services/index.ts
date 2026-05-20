@@ -7,4 +7,6 @@ export { ImportExportService } from "./ImportExportService";
 export { ProveedorService } from "./ProveedorService";
 export { ProveedorActividadService } from "./ProveedorActividadService";
 export { ReservaService } from "./ReservaService";
+export { ResenaService } from "./ResenaService";
+export { ReporteService } from "./ReporteService";
 export type { FiltrosBusqueda } from "./BuscadorService";
