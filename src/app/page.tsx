@@ -45,11 +45,11 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Hero */}
-      <section className="mb-10 text-center">
-        <h1 className="font-[family-name:var(--font-display)] text-4xl font-bold text-caribe-700 md:text-5xl">
+      <section className="gradient-mesh mb-10 rounded-3xl px-8 py-12 text-center">
+        <h1 className="font-[family-name:var(--font-display)] text-4xl font-bold text-caribe-700 md:text-5xl tracking-tight">
           Encuentra la actividad perfecta
         </h1>
-        <p className="mt-3 text-lg text-slate-600">
+        <p className="mt-3 text-lg text-slate-600/80 max-w-xl mx-auto">
           Actividades educativas, deportivas y culturales para niños en Barranquilla
         </p>
       </section>

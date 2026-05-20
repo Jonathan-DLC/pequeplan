@@ -12,7 +12,7 @@ export function Header() {
       <a href="#main-content" className="skip-link">
         Saltar al contenido
       </a>
-      <header className="sticky top-0 z-50 border-b border-caribe-100 bg-white/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-caribe-100/50 bg-white/70 backdrop-blur-lg">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Navegación principal">
           <Link
             href="/"
