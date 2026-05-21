@@ -27,6 +27,8 @@ export default function NuevaActividadProveedor() {
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [direccion, setDireccion] = useState("");
+  const [latitud, setLatitud] = useState("");
+  const [longitud, setLongitud] = useState("");
   const [cupos, setCupos] = useState("");
   const [guardando, setGuardando] = useState(false);
 
@@ -61,8 +63,8 @@ export default function NuevaActividadProveedor() {
       moneda: esGratuita ? null : Moneda.COP,
       estado: EstadoActividad.PUBLICADA,
       imagenUrl: null,
-      latitud: null,
-      longitud: null,
+      latitud: latitud ? Number(latitud) : null,
+      longitud: longitud ? Number(longitud) : null,
       cuposDisponibles: cupos ? Number(cupos) : null,
       destacada: false,
       horarios,
@@ -153,6 +155,8 @@ export default function NuevaActividadProveedor() {
             <input placeholder="WhatsApp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={input} />
             <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} />
             <input placeholder="Dirección" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={input} />
+            <input placeholder="Latitud (ej: 10.9995)" value={latitud} onChange={(e) => setLatitud(e.target.value)} className={input} type="number" step="any" />
+            <input placeholder="Longitud (ej: -74.8109)" value={longitud} onChange={(e) => setLongitud(e.target.value)} className={input} type="number" step="any" />
           </div>
         </div>
 
