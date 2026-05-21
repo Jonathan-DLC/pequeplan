@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { BuscadorService, CompartirService, FavoritosService, ReservaService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const MapaEmbed = dynamic(() => import("@/components/MapaEmbed").then((m) => m.MapaEmbed), { ssr: false });
 
@@ -29,19 +31,27 @@ export default function DetalleActividad() {
   const [cuposRestantes, setCuposRestantes] = useState<number | null>(null);
 
   useEffect(() => {
-    const svc = new BuscadorService();
-    const act = svc.verDetalle(id);
-    if (!act) { router.push("/"); return; }
-    setActividad(act);
-    setCategoria(new LocalStorageRepository<Categoria>("categorias").obtenerPorId(act.categoriaId));
-    setRango(new LocalStorageRepository<RangoEdad>("rangos-edad").obtenerPorId(act.rangoEdadId));
-    setZona(new LocalStorageRepository<Zona>("zonas").obtenerPorId(act.zonaId));
-    setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(act.id));
-    if (act.cuposDisponibles != null) {
-      new ReservaService().contarActivasPorActividad(act.id).then((count) => {
-        setCuposRestantes(act.cuposDisponibles! - count);
-      });
-    }
+    const loadActivity = async () => {
+      const svc = new BuscadorService();
+      let act = svc.verDetalle(id);
+      // Fallback to Firestore for provider-created activities
+      if (!act && db) {
+        const snap = await getDoc(doc(db, "actividades", id));
+        if (snap.exists()) act = snap.data() as Actividad;
+      }
+      if (!act) { router.push("/"); return; }
+      setActividad(act);
+      setCategoria(new LocalStorageRepository<Categoria>("categorias").obtenerPorId(act.categoriaId));
+      setRango(new LocalStorageRepository<RangoEdad>("rangos-edad").obtenerPorId(act.rangoEdadId));
+      setZona(new LocalStorageRepository<Zona>("zonas").obtenerPorId(act.zonaId));
+      setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(act.id));
+      if (act.cuposDisponibles != null) {
+        new ReservaService().contarActivasPorActividad(act.id).then((count) => {
+          setCuposRestantes(act!.cuposDisponibles! - count);
+        });
+      }
+    };
+    loadActivity();
   }, [id, router, user]);
 
   const toggleFav = useCallback(async () => {

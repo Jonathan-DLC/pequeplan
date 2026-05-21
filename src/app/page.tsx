@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { BuscadorService, FiltrosBusqueda } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
-import { Actividad, Categoria, CriterioOrden, RangoEdad, Zona } from "@/lib/models";
+import { Actividad, Categoria, CriterioOrden, EstadoActividad, RangoEdad, Zona } from "@/lib/models";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { ActivityCard } from "@/components/ActivityCard";
 import { SearchBar } from "@/components/SearchBar";
 import { FilterPanel } from "@/components/FilterPanel";
@@ -15,6 +17,7 @@ export default function Home() {
   const [criterio, setCriterio] = useState(CriterioOrden.NOMBRE);
   const [asc, setAsc] = useState(true);
   const [actividades, setActividades] = useState<Actividad[]>([]);
+  const [firestoreActs, setFirestoreActs] = useState<Actividad[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [rangosEdad, setRangosEdad] = useState<RangoEdad[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
@@ -25,6 +28,13 @@ export default function Home() {
     setCategorias(new LocalStorageRepository<Categoria>("categorias").obtenerTodos());
     setRangosEdad(new LocalStorageRepository<RangoEdad>("rangos-edad").obtenerTodos());
     setZonas(new LocalStorageRepository<Zona>("zonas").obtenerTodos());
+    // Load Firestore activities
+    if (db) {
+      const q = query(collection(db, "actividades"), where("estado", "==", "PUBLICADA"));
+      getDocs(q).then((snap) => {
+        setFirestoreActs(snap.docs.map((d) => d.data() as Actividad));
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -36,8 +46,24 @@ export default function Home() {
     } else {
       resultado = svc.buscar();
     }
+    // Merge Firestore activities (avoid duplicates by id)
+    const ids = new Set(resultado.map((a) => a.id));
+    const extras = firestoreActs.filter((a) => !ids.has(a.id) && a.estado === EstadoActividad.PUBLICADA);
+    if (texto) {
+      const t = texto.toLowerCase();
+      resultado = [...resultado, ...extras.filter((a) => a.nombre.toLowerCase().includes(t) || a.descripcion.toLowerCase().includes(t))];
+    } else if (Object.values(filtros).some(Boolean)) {
+      let filtered = extras;
+      if (filtros.categoriaId) filtered = filtered.filter((a) => a.categoriaId === filtros.categoriaId);
+      if (filtros.rangoEdadId) filtered = filtered.filter((a) => a.rangoEdadId === filtros.rangoEdadId);
+      if (filtros.zonaId) filtered = filtered.filter((a) => a.zonaId === filtros.zonaId);
+      if (filtros.diaSemana) filtered = filtered.filter((a) => a.horarios.some((h) => h.diaSemana === filtros.diaSemana));
+      resultado = [...resultado, ...filtered];
+    } else {
+      resultado = [...resultado, ...extras];
+    }
     setActividades(svc.ordenar(resultado, criterio, asc));
-  }, [texto, filtros, criterio, asc, svc]);
+  }, [texto, filtros, criterio, asc, svc, firestoreActs]);
 
   const catMap = useMemo(() => new Map(categorias.map((c) => [c.id, c])), [categorias]);
   const zonaMap = useMemo(() => new Map(zonas.map((z) => [z.id, z])), [zonas]);
