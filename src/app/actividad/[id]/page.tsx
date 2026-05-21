@@ -27,6 +27,9 @@ export default function DetalleActividad() {
   const [toast, setToast] = useState("");
   const [showInscribir, setShowInscribir] = useState(false);
   const [nombreNino, setNombreNino] = useState("");
+  const [edadNino, setEdadNino] = useState("");
+  const [nombrePadre, setNombrePadre] = useState("");
+  const [telefonoPadre, setTelefonoPadre] = useState("");
   const [inscribiendo, setInscribiendo] = useState(false);
   const [cuposRestantes, setCuposRestantes] = useState<number | null>(null);
 
@@ -73,11 +76,15 @@ export default function DetalleActividad() {
   if (!actividad) return null;
 
   const inscribir = async () => {
-    if (!user || !actividad || !nombreNino.trim()) return;
+    if (!user || !actividad || !nombreNino.trim() || !nombrePadre.trim() || !telefonoPadre.trim()) return;
     setInscribiendo(true);
-    await new ReservaService().inscribir(actividad.id, user.uid, nombreNino.trim(), actividad.proveedorId, actividad.precioDesde);
+    await new ReservaService().inscribir(
+      actividad.id, user.uid,
+      { nombreNino: nombreNino.trim(), edadNino: Number(edadNino) || 0, nombrePadre: nombrePadre.trim(), telefonoPadre: telefonoPadre.trim() },
+      actividad.proveedorId, actividad.precioDesde
+    );
     setShowInscribir(false);
-    setNombreNino("");
+    setNombreNino(""); setEdadNino(""); setNombrePadre(""); setTelefonoPadre("");
     setInscribiendo(false);
     if (cuposRestantes != null) setCuposRestantes(cuposRestantes - 1);
     setToast("¡Inscripción exitosa!");
@@ -230,14 +237,35 @@ export default function DetalleActividad() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="rounded-2xl bg-white p-6 shadow-xl w-full max-w-sm mx-4">
             <h3 className="font-bold text-lg text-slate-700 mb-4">Inscribir niño</h3>
-            <input
-              placeholder="Nombre del niño"
-              value={nombreNino}
-              onChange={(e) => setNombreNino(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-caribe-400 mb-4"
-            />
-            <div className="flex gap-3">
-              <button onClick={inscribir} disabled={inscribiendo || !nombreNino.trim()} className="flex-1 rounded-xl bg-selva-500 px-4 py-2 text-sm font-semibold text-white hover:bg-selva-600 disabled:opacity-50">
+            <div className="space-y-3">
+              <input
+                placeholder="Nombre del niño *"
+                value={nombreNino}
+                onChange={(e) => setNombreNino(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-caribe-400"
+              />
+              <input
+                placeholder="Edad del niño"
+                value={edadNino}
+                onChange={(e) => setEdadNino(e.target.value)}
+                type="number"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-caribe-400"
+              />
+              <input
+                placeholder="Nombre del padre/tutor *"
+                value={nombrePadre}
+                onChange={(e) => setNombrePadre(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-caribe-400"
+              />
+              <input
+                placeholder="Teléfono de contacto *"
+                value={telefonoPadre}
+                onChange={(e) => setTelefonoPadre(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-caribe-400"
+              />
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={inscribir} disabled={inscribiendo || !nombreNino.trim() || !nombrePadre.trim() || !telefonoPadre.trim()} className="flex-1 rounded-xl bg-selva-500 px-4 py-2 text-sm font-semibold text-white hover:bg-selva-600 disabled:opacity-50">
                 {inscribiendo ? "Inscribiendo..." : "Confirmar"}
               </button>
               <button onClick={() => setShowInscribir(false)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600">

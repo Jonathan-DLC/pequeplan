@@ -122,7 +122,19 @@ export default function PanelProveedor() {
                   {(inscritos[act.id]?.length || 0) === 0 ? (
                     <p className="text-xs text-slate-400">Sin inscripciones aún.</p>
                   ) : (
-                    <div className="space-y-2">{inscritos[act.id].map((r) => (<div key={r.id} className="flex items-center justify-between text-sm"><span className="text-slate-600">👧 {r.nombreNino}</span><span className="text-xs text-slate-400">{new Date(r.creadoEn).toLocaleDateString("es-CO")}</span></div>))}</div>
+                    <div className="space-y-3">{inscritos[act.id].map((r) => (
+                      <div key={r.id} className="rounded-xl bg-slate-50 p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm text-slate-700">👧 {r.nombreNino} {r.edadNino ? `(${r.edadNino} años)` : ""}</span>
+                          <span className="text-xs text-slate-400">{new Date(r.creadoEn).toLocaleDateString("es-CO")}</span>
+                        </div>
+                        <div className="flex gap-4 mt-1 text-xs text-slate-500">
+                          <span>👤 {r.nombrePadre || "—"}</span>
+                          {r.telefonoPadre && <a href={`tel:${r.telefonoPadre}`} className="text-caribe-600 hover:underline">📞 {r.telefonoPadre}</a>}
+                          {r.telefonoPadre && <a href={`https://wa.me/57${r.telefonoPadre.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-selva-600 hover:underline">💬 WhatsApp</a>}
+                        </div>
+                      </div>
+                    ))}</div>
                   )}
                 </div>
               )}

@@ -9,7 +9,7 @@ function getRef() {
 }
 
 export class ReservaService {
-  async inscribir(actividadId: string, uid: string, nombreNino: string, proveedorId?: string | null, precioActividad?: number | null): Promise<Reserva> {
+  async inscribir(actividadId: string, uid: string, datos: { nombreNino: string; edadNino: number; nombrePadre: string; telefonoPadre: string }, proveedorId?: string | null, precioActividad?: number | null): Promise<Reserva> {
     let comision = 0;
     if (proveedorId && precioActividad) {
       const sub = await new SuscripcionService().obtenerActiva(proveedorId);
@@ -20,7 +20,10 @@ export class ReservaService {
       id: crypto.randomUUID(),
       actividadId,
       uid,
-      nombreNino,
+      nombreNino: datos.nombreNino,
+      edadNino: datos.edadNino,
+      nombrePadre: datos.nombrePadre,
+      telefonoPadre: datos.telefonoPadre,
       estado: "ACTIVA",
       comision,
       creadoEn: new Date().toISOString(),

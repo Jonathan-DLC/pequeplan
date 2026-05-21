@@ -76,6 +76,9 @@ export interface Reserva {
   actividadId: string;
   uid: string;
   nombreNino: string;
+  edadNino: number;
+  nombrePadre: string;
+  telefonoPadre: string;
   estado: "ACTIVA" | "CANCELADA";
   comision: number;
   creadoEn: string;
