@@ -49,7 +49,7 @@ export default function DetalleActividad() {
       setZona(new LocalStorageRepository<Zona>("zonas").obtenerPorId(act.zonaId));
       setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(act.id));
       if (act.cuposDisponibles != null) {
-        new ReservaService().contarActivasPorActividad(act.id).then((count) => {
+        new ReservaService().contarConfirmadasPorActividad(act.id).then((count) => {
           setCuposRestantes(act!.cuposDisponibles! - count);
         });
       }
@@ -78,17 +78,17 @@ export default function DetalleActividad() {
   const inscribir = async () => {
     if (!user || !actividad || !nombreNino.trim() || !nombrePadre.trim() || !telefonoPadre.trim()) return;
     setInscribiendo(true);
-    await new ReservaService().inscribir(
+    await new ReservaService().preinscribir(
       actividad.id, user.uid,
       { nombreNino: nombreNino.trim(), edadNino: Number(edadNino) || 0, nombrePadre: nombrePadre.trim(), telefonoPadre: telefonoPadre.trim() },
-      actividad.proveedorId, actividad.precioDesde
+      actividad.proveedorId, actividad.precioDesde, actividad.esGratuita
     );
     setShowInscribir(false);
     setNombreNino(""); setEdadNino(""); setNombrePadre(""); setTelefonoPadre("");
     setInscribiendo(false);
     if (cuposRestantes != null) setCuposRestantes(cuposRestantes - 1);
-    setToast("¡Inscripción exitosa!");
-    setTimeout(() => setToast(""), 2000);
+    setToast("¡Solicitud enviada! El proveedor revisará tu inscripción.");
+    setTimeout(() => setToast(""), 3000);
   };
 
   const dias: Record<string, string> = { LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes", SABADO: "Sábado", DOMINGO: "Domingo" };
@@ -160,7 +160,7 @@ export default function DetalleActividad() {
               onClick={() => setShowInscribir(true)}
               className="rounded-xl bg-selva-500 px-4 py-2 text-sm font-semibold text-white hover:bg-selva-600 transition-all"
             >
-              ✅ Inscribir niño {cuposRestantes != null && `(${cuposRestantes} cupos)`}
+              📝 Solicitar inscripción {cuposRestantes != null && `(${cuposRestantes} cupos)`}
             </button>
           )}
           {cuposRestantes === 0 && (

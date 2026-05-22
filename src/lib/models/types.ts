@@ -74,13 +74,16 @@ export interface Proveedor {
 export interface Reserva {
   id: string;
   actividadId: string;
+  proveedorId: string | null;
   uid: string;
   nombreNino: string;
   edadNino: number;
   nombrePadre: string;
   telefonoPadre: string;
-  estado: "ACTIVA" | "CANCELADA";
+  estado: "PENDIENTE" | "ACEPTADA" | "CONFIRMADA" | "RECHAZADA" | "CANCELADA";
   comision: number;
+  precioActividad: number;
+  esGratuita: boolean;
   creadoEn: string;
 }
 

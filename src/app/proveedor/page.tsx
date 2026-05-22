@@ -13,7 +13,7 @@ export default function PanelProveedor() {
   const [proveedor, setProveedor] = useState<Proveedor | null>(null);
   const [actividades, setActividades] = useState<Actividad[]>([]);
   const [suscripcion, setSuscripcion] = useState<Suscripcion | null>(null);
-  const [inscritos, setInscritos] = useState<Record<string, Reserva[]>>({});
+  const [reservas, setReservas] = useState<Reserva[]>([]);
   const [expandido, setExpandido] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
 
@@ -23,18 +23,14 @@ export default function PanelProveedor() {
     new ProveedorService().obtenerPorUid(user.uid).then(async (p) => {
       if (!p) { router.push("/proveedor/registro"); return; }
       setProveedor(p);
-      const [acts, sub] = await Promise.all([
+      const [acts, sub, res] = await Promise.all([
         new ProveedorActividadService(p.id).listar(),
         new SuscripcionService().obtenerActiva(p.id),
+        new ReservaService().listarPorProveedor(p.id),
       ]);
       setActividades(acts);
       setSuscripcion(sub);
-      const todas = await new ReservaService().listarTodas();
-      const inscMap: Record<string, Reserva[]> = {};
-      acts.forEach((act) => {
-        inscMap[act.id] = todas.filter((r) => r.actividadId === act.id && r.estado === "ACTIVA");
-      });
-      setInscritos(inscMap);
+      setReservas(res);
       setCargando(false);
     });
   }, [user, loading, router]);
@@ -50,6 +46,16 @@ export default function PanelProveedor() {
     if (!proveedor) return;
     await new ProveedorActividadService(proveedor.id).editar(act.id, { destacada: !act.destacada });
     setActividades((prev) => prev.map((a) => a.id === act.id ? { ...a, destacada: !a.destacada } : a));
+  };
+
+  const aceptarReserva = async (r: Reserva) => {
+    await new ReservaService().aceptar(r.id, r.esGratuita);
+    setReservas((prev) => prev.map((x) => x.id === r.id ? { ...x, estado: r.esGratuita ? "CONFIRMADA" : "ACEPTADA" } : x));
+  };
+
+  const rechazarReserva = async (id: string) => {
+    await new ReservaService().rechazar(id);
+    setReservas((prev) => prev.map((x) => x.id === id ? { ...x, estado: "RECHAZADA" } : x));
   };
 
   if (loading || cargando) {
@@ -68,6 +74,8 @@ export default function PanelProveedor() {
   }
 
   const esPremium = suscripcion?.plan === "PREMIUM";
+  const pendientes = reservas.filter((r) => r.estado === "PENDIENTE");
+  const confirmadas = (actId: string) => reservas.filter((r) => r.actividadId === actId && r.estado === "CONFIRMADA");
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -92,6 +100,30 @@ export default function PanelProveedor() {
           {esPremium && <span className="text-xs bg-caribe-200 rounded-full px-2 py-0.5">Puedes destacar actividades</span>}
         </div>
       )}
+
+      {/* Solicitudes pendientes */}
+      {pendientes.length > 0 && (
+        <div className="mb-6">
+          <h2 className="font-[family-name:var(--font-display)] text-lg font-bold text-slate-700 mb-3">📥 Solicitudes pendientes ({pendientes.length})</h2>
+          <div className="space-y-3">
+            {pendientes.map((r) => (
+              <div key={r.id} className="rounded-2xl bg-yellow-50 border border-yellow-200 p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm text-slate-700">👧 {r.nombreNino} {r.edadNino ? `(${r.edadNino} años)` : ""}</p>
+                  <p className="text-xs text-slate-500">👤 {r.nombrePadre} · 📞 {r.telefonoPadre}</p>
+                  <p className="text-xs text-slate-400">Actividad: {actividades.find((a) => a.id === r.actividadId)?.nombre} · {r.esGratuita ? "Gratis" : `$${r.precioActividad.toLocaleString("es-CO")}`}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => aceptarReserva(r)} className="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200">✓ Aceptar</button>
+                  <button onClick={() => rechazarReserva(r.id)} className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100">✗ Rechazar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Actividades */}
       {actividades.length === 0 ? (
         <div className="rounded-3xl bg-white p-12 text-center shadow-sm">
           <p className="text-4xl mb-4">📋</p>
@@ -100,46 +132,49 @@ export default function PanelProveedor() {
         </div>
       ) : (
         <div className="space-y-4">
-          {actividades.map((act) => (
-            <div key={act.id} className="rounded-2xl bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-slate-700">{act.destacada && "⭐ "}{act.nombre}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${act.estado === EstadoActividad.PUBLICADA ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{act.estado === EstadoActividad.PUBLICADA ? "Publicada" : "Pausada"}</span>
-                    <span className="text-xs text-slate-400">👧 {inscritos[act.id]?.length || 0} inscritos</span>
+          {actividades.map((act) => {
+            const inscritos = confirmadas(act.id);
+            return (
+              <div key={act.id} className="rounded-2xl bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-slate-700">{act.destacada && "⭐ "}{act.nombre}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${act.estado === EstadoActividad.PUBLICADA ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{act.estado === EstadoActividad.PUBLICADA ? "Publicada" : "Pausada"}</span>
+                      <span className="text-xs text-slate-400">👧 {inscritos.length} confirmados</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-wrap justify-end">
+                    {esPremium && <button onClick={() => toggleDestacar(act)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${act.destacada ? "bg-yellow-200 text-yellow-800" : "bg-yellow-50 text-yellow-600 hover:bg-yellow-100"}`}>{act.destacada ? "★ Destacada" : "☆ Destacar"}</button>}
+                    <button onClick={() => toggleEstado(act)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${act.estado === EstadoActividad.PUBLICADA ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-green-100 text-green-700 hover:bg-green-200"}`}>{act.estado === EstadoActividad.PUBLICADA ? "⏸ Pausar" : "▶ Reactivar"}</button>
+                    <Link href={`/proveedor/${act.id}/editar`} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors">✏️ Editar</Link>
+                    <button onClick={() => setExpandido(expandido === act.id ? null : act.id)} className="rounded-lg bg-caribe-50 px-3 py-1.5 text-xs font-medium text-caribe-700 hover:bg-caribe-100 transition-colors">👧 Ver inscritos</button>
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end">
-                  {esPremium && <button onClick={() => toggleDestacar(act)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${act.destacada ? "bg-yellow-200 text-yellow-800" : "bg-yellow-50 text-yellow-600 hover:bg-yellow-100"}`}>{act.destacada ? "★ Destacada" : "☆ Destacar"}</button>}
-                  <button onClick={() => toggleEstado(act)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${act.estado === EstadoActividad.PUBLICADA ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-green-100 text-green-700 hover:bg-green-200"}`}>{act.estado === EstadoActividad.PUBLICADA ? "⏸ Pausar" : "▶ Reactivar"}</button>
-                  <Link href={`/proveedor/${act.id}/editar`} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors">✏️ Editar</Link>
-                  <button onClick={() => setExpandido(expandido === act.id ? null : act.id)} className="rounded-lg bg-caribe-50 px-3 py-1.5 text-xs font-medium text-caribe-700 hover:bg-caribe-100 transition-colors">👧 Ver inscritos</button>
-                </div>
+                {expandido === act.id && (
+                  <div className="mt-4 pt-3 border-t border-slate-100">
+                    {inscritos.length === 0 ? (
+                      <p className="text-xs text-slate-400">Sin inscripciones confirmadas aún.</p>
+                    ) : (
+                      <div className="space-y-3">{inscritos.map((r) => (
+                        <div key={r.id} className="rounded-xl bg-slate-50 p-3">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-sm text-slate-700">👧 {r.nombreNino} {r.edadNino ? `(${r.edadNino} años)` : ""}</span>
+                            <span className="text-xs text-slate-400">{new Date(r.creadoEn).toLocaleDateString("es-CO")}</span>
+                          </div>
+                          <div className="flex gap-4 mt-1 text-xs text-slate-500">
+                            <span>👤 {r.nombrePadre}</span>
+                            {r.telefonoPadre && <a href={`tel:${r.telefonoPadre}`} className="text-caribe-600 hover:underline">📞 {r.telefonoPadre}</a>}
+                            {r.telefonoPadre && <a href={`https://wa.me/57${r.telefonoPadre.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-selva-600 hover:underline">💬 WhatsApp</a>}
+                          </div>
+                        </div>
+                      ))}</div>
+                    )}
+                  </div>
+                )}
               </div>
-              {expandido === act.id && (
-                <div className="mt-4 pt-3 border-t border-slate-100">
-                  {(inscritos[act.id]?.length || 0) === 0 ? (
-                    <p className="text-xs text-slate-400">Sin inscripciones aún.</p>
-                  ) : (
-                    <div className="space-y-3">{inscritos[act.id].map((r) => (
-                      <div key={r.id} className="rounded-xl bg-slate-50 p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm text-slate-700">👧 {r.nombreNino} {r.edadNino ? `(${r.edadNino} años)` : ""}</span>
-                          <span className="text-xs text-slate-400">{new Date(r.creadoEn).toLocaleDateString("es-CO")}</span>
-                        </div>
-                        <div className="flex gap-4 mt-1 text-xs text-slate-500">
-                          <span>👤 {r.nombrePadre || "—"}</span>
-                          {r.telefonoPadre && <a href={`tel:${r.telefonoPadre}`} className="text-caribe-600 hover:underline">📞 {r.telefonoPadre}</a>}
-                          {r.telefonoPadre && <a href={`https://wa.me/57${r.telefonoPadre.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-selva-600 hover:underline">💬 WhatsApp</a>}
-                        </div>
-                      </div>
-                    ))}</div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
