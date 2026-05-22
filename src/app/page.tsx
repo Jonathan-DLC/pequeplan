@@ -40,27 +40,16 @@ export default function Home() {
   useEffect(() => {
     let resultado: Actividad[];
     if (texto) {
-      resultado = svc.buscarPorTexto(texto);
-    } else if (Object.values(filtros).some(Boolean)) {
-      resultado = svc.filtrar(filtros);
-    } else {
-      resultado = svc.buscar();
-    }
-    // Merge Firestore activities (avoid duplicates by id)
-    const ids = new Set(resultado.map((a) => a.id));
-    const extras = firestoreActs.filter((a) => !ids.has(a.id) && a.estado === EstadoActividad.PUBLICADA);
-    if (texto) {
       const t = texto.toLowerCase();
-      resultado = [...resultado, ...extras.filter((a) => a.nombre.toLowerCase().includes(t) || a.descripcion.toLowerCase().includes(t))];
+      resultado = firestoreActs.filter((a) => a.estado === EstadoActividad.PUBLICADA && (a.nombre.toLowerCase().includes(t) || a.descripcion.toLowerCase().includes(t)));
     } else if (Object.values(filtros).some(Boolean)) {
-      let filtered = extras;
-      if (filtros.categoriaId) filtered = filtered.filter((a) => a.categoriaId === filtros.categoriaId);
-      if (filtros.rangoEdadId) filtered = filtered.filter((a) => a.rangoEdadId === filtros.rangoEdadId);
-      if (filtros.zonaId) filtered = filtered.filter((a) => a.zonaId === filtros.zonaId);
-      if (filtros.diaSemana) filtered = filtered.filter((a) => a.horarios.some((h) => h.diaSemana === filtros.diaSemana));
-      resultado = [...resultado, ...filtered];
+      resultado = firestoreActs.filter((a) => a.estado === EstadoActividad.PUBLICADA);
+      if (filtros.categoriaId) resultado = resultado.filter((a) => a.categoriaId === filtros.categoriaId);
+      if (filtros.rangoEdadId) resultado = resultado.filter((a) => a.rangoEdadId === filtros.rangoEdadId);
+      if (filtros.zonaId) resultado = resultado.filter((a) => a.zonaId === filtros.zonaId);
+      if (filtros.diaSemana) resultado = resultado.filter((a) => a.horarios.some((h) => h.diaSemana === filtros.diaSemana));
     } else {
-      resultado = [...resultado, ...extras];
+      resultado = firestoreActs.filter((a) => a.estado === EstadoActividad.PUBLICADA);
     }
     setActividades(svc.ordenar(resultado, criterio, asc));
   }, [texto, filtros, criterio, asc, svc, firestoreActs]);
