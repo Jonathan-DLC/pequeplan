@@ -10,14 +10,21 @@ import { db } from "@/lib/firebase";
 export default function AdminActividades() {
   const [actividades, setActividades] = useState<Actividad[]>([]);
   const [categorias, setCategorias] = useState<Map<string, Categoria>>(new Map());
+  const [proveedorNombres, setProveedorNombres] = useState<Map<string, string>>(new Map());
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     const cats = new LocalStorageRepository<Categoria>("categorias").obtenerTodos();
     setCategorias(new Map(cats.map((c) => [c.id, c])));
     if (!db) { setCargando(false); return; }
-    getDocs(collection(db, "actividades")).then((snap) => {
-      setActividades(snap.docs.map((d) => d.data() as Actividad).sort((a, b) => b.creadoEn.localeCompare(a.creadoEn)));
+    Promise.all([
+      getDocs(collection(db, "actividades")),
+      getDocs(collection(db, "proveedores")),
+    ]).then(([actSnap, provSnap]) => {
+      setActividades(actSnap.docs.map((d) => d.data() as Actividad).sort((a, b) => b.creadoEn.localeCompare(a.creadoEn)));
+      const nombres = new Map<string, string>();
+      provSnap.docs.forEach((d) => { const p = d.data(); nombres.set(p.id, p.nombreNegocio); });
+      setProveedorNombres(nombres);
       setCargando(false);
     });
   }, []);
@@ -65,7 +72,7 @@ export default function AdminActividades() {
               <tr key={act.id} className="border-b border-slate-50 hover:bg-arena-50 transition-colors">
                 <td className="px-4 py-3 font-medium text-slate-700">{act.nombre}</td>
                 <td className="px-4 py-3 text-slate-500">{categorias.get(act.categoriaId)?.nombre ?? "—"}</td>
-                <td className="px-4 py-3 text-xs text-slate-400">{act.proveedorId ? act.proveedorId.slice(0, 8) + "..." : "Admin"}</td>
+                <td className="px-4 py-3 text-xs text-slate-400">{act.proveedorId ? proveedorNombres.get(act.proveedorId) || "Proveedor" : "Admin"}</td>
                 <td className="px-4 py-3">
                   <button
                     onClick={() => toggleEstado(act)}

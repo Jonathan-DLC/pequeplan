@@ -52,7 +52,9 @@ export function SeccionResenas({ actividadId, proveedorId }: Props) {
 
   const reportar = async (resenaId: string) => {
     if (!user) return;
-    await new ReporteService().crear({ tipo: "resena", referenciaId: resenaId, uid: user.uid, motivo: "Contenido inapropiado" });
+    const motivo = prompt("¿Por qué reportas esta reseña?\n\n• Contenido inapropiado\n• Spam\n• Información falsa\n• Otro");
+    if (!motivo) return;
+    await new ReporteService().crear({ tipo: "resena", referenciaId: resenaId, uid: user.uid, motivo });
     setToast("Reporte enviado");
     setTimeout(() => setToast(""), 2000);
   };

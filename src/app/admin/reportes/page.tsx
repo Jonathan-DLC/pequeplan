@@ -2,14 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { ReporteService } from "@/lib/services";
-import { Reporte } from "@/lib/models";
+import { Reporte, Actividad } from "@/lib/models";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function AdminReportes() {
   const [reportes, setReportes] = useState<Reporte[]>([]);
+  const [actMap, setActMap] = useState<Map<string, string>>(new Map());
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    new ReporteService().listarTodos().then((r) => { setReportes(r); setCargando(false); });
+    Promise.all([
+      new ReporteService().listarTodos(),
+      db ? getDocs(collection(db, "actividades")) : Promise.resolve(null),
+    ]).then(([r, snap]) => {
+      setReportes(r);
+      if (snap) {
+        const map = new Map<string, string>();
+        snap.docs.forEach((d) => { const a = d.data() as Actividad; map.set(a.id, a.nombre); });
+        setActMap(map);
+      }
+      setCargando(false);
+    });
   }, []);
 
   const resolver = async (id: string) => {
@@ -23,6 +37,11 @@ export default function AdminReportes() {
 
   const pendientes = reportes.filter((r) => r.estado === "PENDIENTE");
   const resueltos = reportes.filter((r) => r.estado === "RESUELTO");
+
+  const getNombre = (r: Reporte) => {
+    if (r.tipo === "actividad") return actMap.get(r.referenciaId) || r.referenciaId.slice(0, 8) + "...";
+    return "Reseña " + r.referenciaId.slice(0, 8) + "...";
+  };
 
   return (
     <div>
@@ -39,8 +58,9 @@ export default function AdminReportes() {
                 {pendientes.map((r) => (
                   <div key={r.id} className="flex items-center justify-between rounded-2xl bg-yellow-50 p-4">
                     <div>
-                      <p className="text-sm font-medium text-slate-700">Tipo: {r.tipo} · Motivo: {r.motivo}</p>
-                      <p className="text-xs text-slate-400">ID ref: {r.referenciaId.slice(0, 8)}... · {new Date(r.creadoEn).toLocaleDateString("es-CO")}</p>
+                      <p className="text-sm font-medium text-slate-700">{r.tipo === "actividad" ? "📋" : "💬"} {getNombre(r)}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Motivo: {r.motivo}</p>
+                      <p className="text-xs text-slate-400">{new Date(r.creadoEn).toLocaleDateString("es-CO")}</p>
                     </div>
                     <button onClick={() => resolver(r.id)} className="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200">
                       ✓ Resolver
@@ -57,8 +77,8 @@ export default function AdminReportes() {
                 {resueltos.map((r) => (
                   <div key={r.id} className="flex items-center justify-between rounded-2xl bg-slate-50 p-4 opacity-60">
                     <div>
-                      <p className="text-sm text-slate-600">Tipo: {r.tipo} · Motivo: {r.motivo}</p>
-                      <p className="text-xs text-slate-400">{new Date(r.creadoEn).toLocaleDateString("es-CO")}</p>
+                      <p className="text-sm text-slate-600">{r.tipo === "actividad" ? "📋" : "💬"} {getNombre(r)}</p>
+                      <p className="text-xs text-slate-400">Motivo: {r.motivo} · {new Date(r.creadoEn).toLocaleDateString("es-CO")}</p>
                     </div>
                     <span className="text-xs text-green-600">Resuelto</span>
                   </div>

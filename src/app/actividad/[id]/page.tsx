@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { BuscadorService, CompartirService, FavoritosService, ReservaService } from "@/lib/services";
+import { BuscadorService, CompartirService, FavoritosService, ReservaService, ReporteService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, RangoEdad, Zona } from "@/lib/models";
 import { doc, getDoc } from "firebase/firestore";
@@ -29,6 +29,8 @@ export default function DetalleActividad() {
   const [telefonoPadre, setTelefonoPadre] = useState("");
   const [inscribiendo, setInscribiendo] = useState(false);
   const [cuposRestantes, setCuposRestantes] = useState<number | null>(null);
+  const [showReportar, setShowReportar] = useState(false);
+  const [motivoReporte, setMotivoReporte] = useState("");
 
   useEffect(() => {
     const loadActivity = async () => {
@@ -71,6 +73,15 @@ export default function DetalleActividad() {
   }, [actividad]);
 
   if (!actividad) return null;
+
+  const reportarActividad = async () => {
+    if (!user || !actividad || !motivoReporte) return;
+    await new ReporteService().crear({ tipo: "actividad", referenciaId: actividad.id, uid: user.uid, motivo: motivoReporte });
+    setShowReportar(false);
+    setMotivoReporte("");
+    setToast("Reporte enviado. Gracias por tu feedback.");
+    setTimeout(() => setToast(""), 3000);
+  };
 
   const inscribir = async () => {
     if (!user || !actividad || !nombreNino.trim() || !nombrePadre.trim() || !telefonoPadre.trim()) return;
@@ -163,6 +174,14 @@ export default function DetalleActividad() {
           {cuposRestantes === 0 && (
             <span className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-500">Sin cupos</span>
           )}
+          {user && (
+            <button
+              onClick={() => setShowReportar(true)}
+              className="rounded-xl bg-white border border-red-200 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 transition-all"
+            >
+              🚩 Reportar
+            </button>
+          )}
         </div>
       </div>
 
@@ -221,6 +240,31 @@ export default function DetalleActividad() {
           </div>
         </aside>
       </div>
+
+      {/* Modal reportar */}
+      {showReportar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="rounded-2xl bg-white p-6 shadow-xl w-full max-w-sm mx-4">
+            <h3 className="font-bold text-lg text-slate-700 mb-4">🚩 Reportar actividad</h3>
+            <div className="space-y-2 mb-4">
+              {["Información falsa", "Contenido inapropiado", "Actividad no existe", "Spam o publicidad engañosa", "Otro"].map((m) => (
+                <label key={m} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                  <input type="radio" name="motivo" value={m} checked={motivoReporte === m} onChange={(e) => setMotivoReporte(e.target.value)} className="accent-red-500" />
+                  {m}
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <button onClick={reportarActividad} disabled={!motivoReporte} className="flex-1 rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50">
+                Enviar reporte
+              </button>
+              <button onClick={() => { setShowReportar(false); setMotivoReporte(""); }} className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal inscripción */}
       {showInscribir && (
