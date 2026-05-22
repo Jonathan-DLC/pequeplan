@@ -90,6 +90,7 @@ export default function PanelProveedor() {
           <p className="text-sm text-slate-500 mt-1">Panel de proveedor</p>
         </div>
         <div className="flex gap-2">
+          <Link href="/proveedor/perfil" className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">✏️ Perfil</Link>
           <Link href="/proveedor/planes" className="rounded-xl border border-caribe-200 px-4 py-2.5 text-sm font-semibold text-caribe-600 hover:bg-caribe-50 transition-colors">💎 Planes</Link>
           {proveedor?.aprobado && <Link href="/proveedor/nueva" className="rounded-xl bg-caribe-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-caribe-600 transition-colors">+ Nueva actividad</Link>}
         </div>

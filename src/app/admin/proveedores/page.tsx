@@ -35,6 +35,15 @@ export default function AdminProveedores() {
     setProveedores((prev) => prev.map((p) => p.id === id ? { ...p, verificado: false } : p));
   };
 
+  const eliminar = async (id: string) => {
+    if (!confirm("¿Eliminar este proveedor? Esta acción no se puede deshacer.")) return;
+    const { deleteDoc, doc } = await import("firebase/firestore");
+    const { db } = await import("@/lib/firebase");
+    if (!db) return;
+    await deleteDoc(doc(db, "proveedores", id));
+    setProveedores((prev) => prev.filter((p) => p.id !== id));
+  };
+
   if (cargando) {
     return <div className="flex justify-center py-10"><div className="h-8 w-8 animate-spin rounded-full border-4 border-caribe-200 border-t-caribe-500" /></div>;
   }
@@ -81,6 +90,7 @@ export default function AdminProveedores() {
                     )}
                   </>
                 )}
+                <button onClick={() => eliminar(p.id)} className="rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200">🗑️ Eliminar</button>
               </div>
             </div>
           ))}
