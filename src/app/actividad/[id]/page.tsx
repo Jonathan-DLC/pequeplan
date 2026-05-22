@@ -31,6 +31,9 @@ export default function DetalleActividad() {
   const [cuposRestantes, setCuposRestantes] = useState<number | null>(null);
   const [showReportar, setShowReportar] = useState(false);
   const [motivoReporte, setMotivoReporte] = useState("");
+  const [descripcionReporte, setDescripcionReporte] = useState("");
+  const [nombreReportante, setNombreReportante] = useState("");
+  const [contactoReportante, setContactoReportante] = useState("");
 
   useEffect(() => {
     const loadActivity = async () => {
@@ -75,10 +78,14 @@ export default function DetalleActividad() {
   if (!actividad) return null;
 
   const reportarActividad = async () => {
-    if (!user || !actividad || !motivoReporte) return;
-    await new ReporteService().crear({ tipo: "actividad", referenciaId: actividad.id, uid: user.uid, motivo: motivoReporte });
+    if (!user || !actividad || !motivoReporte || !nombreReportante || !contactoReportante) return;
+    await new ReporteService().crear({
+      tipo: "actividad", referenciaId: actividad.id, actividadId: actividad.id,
+      uid: user.uid, nombreReportante, contactoReportante, motivo: motivoReporte,
+      descripcion: descripcionReporte,
+    });
     setShowReportar(false);
-    setMotivoReporte("");
+    setMotivoReporte(""); setDescripcionReporte(""); setNombreReportante(""); setContactoReportante("");
     setToast("Reporte enviado. Gracias por tu feedback.");
     setTimeout(() => setToast(""), 3000);
   };
@@ -244,21 +251,54 @@ export default function DetalleActividad() {
       {/* Modal reportar */}
       {showReportar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="rounded-2xl bg-white p-6 shadow-xl w-full max-w-sm mx-4">
+          <div className="rounded-2xl bg-white p-6 shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg text-slate-700 mb-4">🚩 Reportar actividad</h3>
-            <div className="space-y-2 mb-4">
-              {["Información falsa", "Contenido inapropiado", "Actividad no existe", "Spam o publicidad engañosa", "Otro"].map((m) => (
-                <label key={m} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                  <input type="radio" name="motivo" value={m} checked={motivoReporte === m} onChange={(e) => setMotivoReporte(e.target.value)} className="accent-red-500" />
-                  {m}
-                </label>
-              ))}
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Motivo *</p>
+                <div className="space-y-2">
+                  {["Información falsa", "Contenido inapropiado", "Actividad no existe", "Spam o publicidad engañosa", "Otro"].map((m) => (
+                    <label key={m} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                      <input type="radio" name="motivo" value={m} checked={motivoReporte === m} onChange={(e) => setMotivoReporte(e.target.value)} className="accent-red-500" />
+                      {m}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Descripción {motivoReporte === "Otro" && "*"}</p>
+                <textarea
+                  value={descripcionReporte}
+                  onChange={(e) => setDescripcionReporte(e.target.value)}
+                  placeholder="Describe con detalle el problema..."
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300"
+                />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Tu nombre *</p>
+                <input
+                  value={nombreReportante}
+                  onChange={(e) => setNombreReportante(e.target.value)}
+                  placeholder="Nombre completo"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300"
+                />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Email o teléfono de contacto *</p>
+                <input
+                  value={contactoReportante}
+                  onChange={(e) => setContactoReportante(e.target.value)}
+                  placeholder="correo@ejemplo.com o 300 123 4567"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300"
+                />
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button onClick={reportarActividad} disabled={!motivoReporte} className="flex-1 rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50">
+            <div className="flex gap-3 mt-5">
+              <button onClick={reportarActividad} disabled={!motivoReporte || !nombreReportante || !contactoReportante} className="flex-1 rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50">
                 Enviar reporte
               </button>
-              <button onClick={() => { setShowReportar(false); setMotivoReporte(""); }} className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600">
+              <button onClick={() => { setShowReportar(false); setMotivoReporte(""); setDescripcionReporte(""); setNombreReportante(""); setContactoReportante(""); }} className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600">
                 Cancelar
               </button>
             </div>

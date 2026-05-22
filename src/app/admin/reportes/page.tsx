@@ -52,7 +52,8 @@ export default function AdminReportes() {
 
   const renderReporte = (r: Reporte, showActions: boolean) => {
     const resena = r.tipo === "resena" ? resenaMap.get(r.referenciaId) : null;
-    const actNombre = r.tipo === "actividad" ? actMap.get(r.referenciaId) : resena ? actMap.get(resena.actividadId) : null;
+    const actNombre = r.tipo === "actividad" ? actMap.get(r.referenciaId) : resena ? actMap.get(resena.actividadId) : actMap.get(r.actividadId || "");
+    const actId = r.tipo === "actividad" ? r.referenciaId : r.actividadId || resena?.actividadId;
 
     return (
       <div key={r.id} className={`rounded-2xl p-4 ${showActions ? "bg-yellow-50" : "bg-slate-50 opacity-60"}`}>
@@ -60,9 +61,16 @@ export default function AdminReportes() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm font-medium text-slate-700">{r.tipo === "actividad" ? "📋 Actividad" : "💬 Reseña"}</span>
-              {actNombre && <span className="text-xs bg-caribe-50 text-caribe-700 rounded px-1.5 py-0.5">{actNombre}</span>}
+              {actNombre && actId && (
+                <a href={`/actividad/${actId}`} target="_blank" rel="noopener noreferrer" className="text-xs bg-caribe-50 text-caribe-700 rounded px-1.5 py-0.5 hover:underline">{actNombre} ↗</a>
+              )}
             </div>
             <p className="text-xs text-red-600 font-medium">Motivo: {r.motivo}</p>
+            {r.descripcion && <p className="text-xs text-slate-600 mt-1">{r.descripcion}</p>}
+            <div className="mt-2 text-xs text-slate-500">
+              <span>Reportado por: <strong>{r.nombreReportante || "—"}</strong></span>
+              {r.contactoReportante && <span> · {r.contactoReportante}</span>}
+            </div>
             {resena && (
               <div className="mt-2 rounded-lg bg-white border border-slate-100 p-3">
                 <div className="flex items-center gap-2 mb-1">

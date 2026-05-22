@@ -20,6 +20,11 @@ export function SeccionResenas({ actividadId, proveedorId }: Props) {
   const [respuestaId, setRespuestaId] = useState<string | null>(null);
   const [respuestaTexto, setRespuestaTexto] = useState("");
   const [toast, setToast] = useState("");
+  const [reportarId, setReportarId] = useState<string | null>(null);
+  const [motivoRep, setMotivoRep] = useState("");
+  const [descripcionRep, setDescripcionRep] = useState("");
+  const [nombreRep, setNombreRep] = useState("");
+  const [contactoRep, setContactoRep] = useState("");
 
   useEffect(() => {
     new ResenaService().listarPorActividad(actividadId).then(setResenas);
@@ -50,11 +55,15 @@ export function SeccionResenas({ actividadId, proveedorId }: Props) {
     setRespuestaTexto("");
   };
 
-  const reportar = async (resenaId: string) => {
-    if (!user) return;
-    const motivo = prompt("¿Por qué reportas esta reseña?\n\n• Contenido inapropiado\n• Spam\n• Información falsa\n• Otro");
-    if (!motivo) return;
-    await new ReporteService().crear({ tipo: "resena", referenciaId: resenaId, uid: user.uid, motivo });
+  const reportar = async () => {
+    if (!user || !reportarId || !motivoRep || !nombreRep || !contactoRep) return;
+    const resena = resenas.find((r) => r.id === reportarId);
+    await new ReporteService().crear({
+      tipo: "resena", referenciaId: reportarId, actividadId,
+      uid: user.uid, nombreReportante: nombreRep, contactoReportante: contactoRep,
+      motivo: motivoRep, descripcion: descripcionRep,
+    });
+    setReportarId(null); setMotivoRep(""); setDescripcionRep(""); setNombreRep(""); setContactoRep("");
     setToast("Reporte enviado");
     setTimeout(() => setToast(""), 2000);
   };
@@ -107,7 +116,7 @@ export function SeccionResenas({ actividadId, proveedorId }: Props) {
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-400">{new Date(r.creadoEn).toLocaleDateString("es-CO")}</span>
                   {user && (
-                    <button onClick={() => reportar(r.id)} className="text-xs text-slate-400 hover:text-red-500" title="Reportar">🚩</button>
+                    <button onClick={() => setReportarId(r.id)} className="text-xs text-slate-400 hover:text-red-500" title="Reportar">🚩</button>
                   )}
                 </div>
               </div>
@@ -130,6 +139,44 @@ export function SeccionResenas({ actividadId, proveedorId }: Props) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal reportar reseña */}
+      {reportarId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="rounded-2xl bg-white p-6 shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="font-bold text-lg text-slate-700 mb-4">🚩 Reportar reseña</h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Motivo *</p>
+                <div className="space-y-2">
+                  {["Contenido inapropiado", "Spam", "Información falsa", "Acoso", "Otro"].map((m) => (
+                    <label key={m} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                      <input type="radio" name="motivoRes" value={m} checked={motivoRep === m} onChange={(e) => setMotivoRep(e.target.value)} className="accent-red-500" />
+                      {m}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Descripción</p>
+                <textarea value={descripcionRep} onChange={(e) => setDescripcionRep(e.target.value)} placeholder="Describe el problema..." rows={2} className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Tu nombre *</p>
+                <input value={nombreRep} onChange={(e) => setNombreRep(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Email o teléfono *</p>
+                <input value={contactoRep} onChange={(e) => setContactoRep(e.target.value)} placeholder="correo@ejemplo.com o 300 123 4567" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={reportar} disabled={!motivoRep || !nombreRep || !contactoRep} className="flex-1 rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50">Enviar reporte</button>
+              <button onClick={() => { setReportarId(null); setMotivoRep(""); setDescripcionRep(""); setNombreRep(""); setContactoRep(""); }} className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600">Cancelar</button>
+            </div>
+          </div>
         </div>
       )}
     </section>

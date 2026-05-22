@@ -102,8 +102,12 @@ export interface Reporte {
   id: string;
   tipo: "resena" | "actividad";
   referenciaId: string;
+  actividadId: string;
   uid: string;
+  nombreReportante: string;
+  contactoReportante: string;
   motivo: string;
+  descripcion: string;
   estado: "PENDIENTE" | "RESUELTO";
   creadoEn: string;
 }
