@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { ProveedorService } from "@/lib/services";
 import { Proveedor } from "@/lib/models";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function AdminProveedores() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
@@ -21,8 +23,9 @@ export default function AdminProveedores() {
   };
 
   const rechazar = async (id: string) => {
-    await new ProveedorService().rechazar(id);
-    setProveedores((prev) => prev.map((p) => p.id === id ? { ...p, aprobado: false } : p));
+    if (!db) return;
+    await deleteDoc(doc(db, "proveedores", id));
+    setProveedores((prev) => prev.filter((p) => p.id !== id));
   };
 
   const verificar = async (id: string) => {
