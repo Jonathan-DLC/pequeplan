@@ -64,6 +64,7 @@ export default function MisInscripciones() {
     CONFIRMADA: { color: "bg-green-100 text-green-700", label: "✅ Confirmada" },
     RECHAZADA: { color: "bg-red-100 text-red-600", label: "✗ Rechazada" },
     CANCELADA: { color: "bg-slate-100 text-slate-500", label: "Cancelada" },
+    ACTIVA: { color: "bg-green-100 text-green-700", label: "✅ Confirmada (legacy)" },
   };
 
   return (
@@ -80,7 +81,7 @@ export default function MisInscripciones() {
         <div className="space-y-4">
           {reservas.map((r) => {
             const act = actMap.get(r.actividadId);
-            const cfg = estadoConfig[r.estado];
+            const cfg = estadoConfig[r.estado] || { color: "bg-slate-100 text-slate-500", label: r.estado };
             return (
               <div key={r.id} className="rounded-2xl bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between">
