@@ -159,10 +159,12 @@ export function SeccionResenas({ actividadId, proveedorId }: Props) {
                   ))}
                 </div>
               </div>
+              {motivoRep === "Otro" && (
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Descripción</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Descripción *</p>
                 <textarea value={descripcionRep} onChange={(e) => setDescripcionRep(e.target.value)} placeholder="Describe el problema..." rows={2} className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300" />
               </div>
+              )}
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Tu nombre *</p>
                 <input value={nombreRep} onChange={(e) => setNombreRep(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300" />

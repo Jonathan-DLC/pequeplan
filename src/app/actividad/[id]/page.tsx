@@ -265,8 +265,9 @@ export default function DetalleActividad() {
                   ))}
                 </div>
               </div>
+              {motivoReporte === "Otro" && (
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Descripción {motivoReporte === "Otro" && "*"}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Descripción *</p>
                 <textarea
                   value={descripcionReporte}
                   onChange={(e) => setDescripcionReporte(e.target.value)}
@@ -275,6 +276,7 @@ export default function DetalleActividad() {
                   className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-red-300"
                 />
               </div>
+              )}
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Tu nombre *</p>
                 <input
