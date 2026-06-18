@@ -17,7 +17,14 @@ export function ActivityCard({ actividad, categoria, zona }: Props) {
   const [esFav, setEsFav] = useState(false);
 
   useEffect(() => {
-    setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(actividad.id));
+    if (!user?.uid) {
+      setEsFav(false);
+      return;
+    }
+    const svc = new FavoritosService(user.uid);
+    svc.sincronizarDesdeFirestore().then(() => {
+      setEsFav(svc.esFavoritaLocal(actividad.id));
+    });
   }, [actividad.id, user]);
 
   const toggleFav = async (e: React.MouseEvent) => {

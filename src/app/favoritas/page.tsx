@@ -2,26 +2,57 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { FavoritosService } from "@/lib/services";
+import { FavoritosFirestoreService } from "@/lib/services";
 import { LocalStorageRepository } from "@/lib/repositories";
 import { Actividad, Categoria, Zona } from "@/lib/models";
 import { ActivityCard } from "@/components/ActivityCard";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import Link from "next/link";
 
 export default function Favoritas() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [actividades, setActividades] = useState<Actividad[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    const svc = new FavoritosService(user?.uid);
-    svc.sincronizarDesdeFirestore().then(() => {
-      setActividades(svc.listarLocal());
-    });
+    if (authLoading) return;
+    if (!user) { setCargando(false); return; }
+
+    const cargarFavoritas = async () => {
+      setCargando(true);
+      try {
+        const favSvc = new FavoritosFirestoreService(user.uid);
+        const ids = await favSvc.listarIds();
+
+        if (ids.length === 0) {
+          setActividades([]);
+          setCargando(false);
+          return;
+        }
+
+        // Buscar cada actividad en Firestore por su ID
+        const promesas = ids.map(async (id) => {
+          if (!db) return null;
+          const snap = await getDoc(doc(db, "actividades", id));
+          return snap.exists() ? (snap.data() as Actividad) : null;
+        });
+
+        const resultados = await Promise.all(promesas);
+        setActividades(resultados.filter((a): a is Actividad => a !== null));
+      } catch (error) {
+        console.error("Error al cargar favoritas:", error);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarFavoritas();
     setCategorias(new LocalStorageRepository<Categoria>("categorias").obtenerTodos());
     setZonas(new LocalStorageRepository<Zona>("zonas").obtenerTodos());
-  }, [user]);
+  }, [user, authLoading]);
 
   const catMap = useMemo(() => new Map(categorias.map((c) => [c.id, c])), [categorias]);
   const zonaMap = useMemo(() => new Map(zonas.map((z) => [z.id, z])), [zonas]);
@@ -32,7 +63,18 @@ export default function Favoritas() {
         ❤️ Mis Favoritas
       </h1>
 
-      {actividades.length === 0 ? (
+      {cargando ? (
+        <div className="rounded-3xl bg-white p-12 text-center shadow-sm">
+          <p className="text-4xl mb-3 animate-pulse">💫</p>
+          <p className="text-lg font-semibold text-slate-700">Cargando favoritas...</p>
+        </div>
+      ) : !user ? (
+        <div className="rounded-3xl bg-white p-12 text-center shadow-sm">
+          <p className="text-5xl mb-4">🔒</p>
+          <p className="text-lg font-semibold text-slate-700">Inicia sesión para ver tus favoritas</p>
+          <p className="mt-2 text-sm text-slate-500">Necesitas una cuenta para guardar y ver actividades favoritas</p>
+        </div>
+      ) : actividades.length === 0 ? (
         <div className="rounded-3xl bg-white p-12 text-center shadow-sm">
           <p className="text-5xl mb-4">💫</p>
           <p className="text-lg font-semibold text-slate-700">¡Aún no tienes favoritas!</p>
