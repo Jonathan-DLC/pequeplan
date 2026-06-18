@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 
-const ADMIN_EMAILS = ["jonathan_lozano1489@americana.edu.co", "jonathandavidlozano583@gmail.com", "kevinescalante201@gmail.com", "aptt1996@hotmail.com", "anatfotos1996@hotmail.com", "anatfotos1996@gmail.com"];
+const ADMIN_EMAILS = ["jonathan_lozano1489@americana.edu.co", "jonathandavidlozano583@gmail.com", "kevinescalante201@gmail.com", "aptt1996@hotmail.com", "anatfotos1996@hotmail.com", "anatfotos1996@gmail.com", "torresanap@coruniamericana.edu.co"];
 
 interface AuthState {
   user: User | null;
