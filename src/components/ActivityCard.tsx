@@ -20,11 +20,18 @@ export function ActivityCard({ actividad, categoria, zona }: Props) {
     setEsFav(new FavoritosService(user?.uid).esFavoritaLocal(actividad.id));
   }, [actividad.id, user]);
 
-  const toggleFav = (e: React.MouseEvent) => {
+  const toggleFav = async (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const svc = new FavoritosService(user?.uid);
-    if (esFav) { svc.quitar(actividad.id); } else { svc.agregar(actividad.id); }
-    setEsFav(!esFav);
+    const nuevoEstado = !esFav;
+    setEsFav(nuevoEstado);
+    try {
+      if (esFav) { await svc.quitar(actividad.id); } else { await svc.agregar(actividad.id); }
+    } catch (error) {
+      console.error("Error al guardar favorito:", error);
+      setEsFav(esFav);
+    }
   };
 
   const horarioResumen = actividad.horarios
