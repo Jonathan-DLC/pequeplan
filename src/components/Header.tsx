@@ -16,9 +16,10 @@ export function Header() {
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Navegación principal">
           <Link
             href="/"
-            className="font-[family-name:var(--font-display)] text-2xl font-bold text-caribe-600 transition-colors hover:text-coral-500"
+            className="flex items-center gap-2 font-[family-name:var(--font-display)] text-2xl font-bold text-caribe-600 transition-colors hover:text-coral-500"
           >
-            🎈 PequePlan
+            <Image src="/icon-192.png" alt="PequePlan Icon" width={32} height={32} className="rounded-md" />
+            PequePlan
           </Link>
           <div className="flex items-center gap-4 text-sm font-medium">
             <Link href="/" className="text-slate-600 hover:text-caribe-600 transition-colors">
